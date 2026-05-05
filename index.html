@@ -28,6 +28,10 @@
     --danger-bg: #faece7;
     --pink-bg: #fbeaf0;
     --pink: #993556;
+    --teal-bg: #e1f5ee;
+    --teal: #0f6e56;
+    --gray-bg: #f1efe8;
+    --gray: #5f5e5a;
     --radius-sm: 6px;
     --radius-md: 8px;
     --radius-lg: 12px;
@@ -58,6 +62,10 @@
       --danger-bg: #3a1f10;
       --pink-bg: #3a1828;
       --pink: #ed93b1;
+      --teal-bg: #0c3327;
+      --teal: #5dcaa5;
+      --gray-bg: #2c2c2a;
+      --gray: #b4b2a9;
     }
   }
 
@@ -72,14 +80,12 @@
   }
   .container { max-width: 720px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
 
-  /* Header */
   .header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 1.25rem; }
   .title { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
   .stats { display: flex; gap: 8px; flex-wrap: wrap; }
   .stat-pill { display: flex; align-items: center; gap: 6px; background: var(--surface-2); border-radius: 20px; padding: 5px 12px; font-size: 13px; color: var(--text-muted); }
   .stat-pill b { color: var(--text); font-weight: 500; }
 
-  /* XP bar */
   .xp-bar-wrap { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px 18px; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
   .xp-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
   .xp-track { height: 10px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
@@ -87,39 +93,45 @@
   .streak { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 8px; }
   .streak b { color: var(--danger); }
 
-  /* Timer */
   .timer-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--accent-bg); border: 0.5px solid var(--accent-border); border-radius: var(--radius-lg); padding: 12px 18px; margin-bottom: 1rem; flex-wrap: wrap; }
   .timer-display { font-size: 28px; font-weight: 500; color: var(--accent-strong); font-variant-numeric: tabular-nums; line-height: 1; }
   .timer-label { font-size: 12px; color: var(--accent); margin-bottom: 4px; }
   .timer-controls { display: flex; gap: 8px; }
 
-  /* Tabs */
   .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
   .tab { padding: 6px 14px; border-radius: 20px; font-size: 13px; border: 0.5px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; font-family: inherit; }
   .tab:hover { background: var(--surface-2); }
   .tab.active { background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent-strong); font-weight: 500; }
 
-  /* Add row */
+  .cat-filters { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+  .cat-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 0.5px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .cat-chip:hover { background: var(--surface-2); }
+  .cat-chip .count { font-size: 11px; opacity: 0.7; }
+  .cat-chip-manage { padding: 5px 10px; border-radius: 20px; font-size: 12px; border: 0.5px dashed var(--border-strong); background: transparent; color: var(--text-subtle); cursor: pointer; font-family: inherit; margin-left: auto; }
+  .cat-chip-manage:hover { color: var(--text); border-color: var(--text-muted); }
+
   .add-row { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
   .add-row input[type="text"] { flex: 1 1 180px; padding: 9px 14px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-md); font-size: 14px; background: var(--surface); color: var(--text); outline: none; font-family: inherit; }
   .add-row input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
-  .xp-select { padding: 9px 12px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-md); font-size: 13px; background: var(--surface); color: var(--text-muted); outline: none; cursor: pointer; font-family: inherit; }
+  .picker { padding: 9px 12px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-md); font-size: 13px; background: var(--surface); color: var(--text-muted); outline: none; cursor: pointer; font-family: inherit; }
 
   button.btn-primary { padding: 9px 18px; border: 0.5px solid var(--accent-border); border-radius: var(--radius-md); background: var(--accent-bg); color: var(--accent-strong); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: inherit; }
   button.btn-primary:hover { background: var(--accent-border); color: white; }
   button.btn-ghost { padding: 5px 14px; border-radius: var(--radius-md); border: 0.5px solid var(--accent-border); background: transparent; color: var(--accent-strong); font-size: 13px; cursor: pointer; font-family: inherit; }
   button.btn-ghost:hover { background: var(--accent-bg); }
 
-  /* Task list */
   .task-list { display: flex; flex-direction: column; gap: 6px; }
-  .task-card { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 12px 16px; transition: opacity 0.3s, transform 0.2s; box-shadow: var(--shadow); }
+  .task-card { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 12px 16px; transition: opacity 0.3s; box-shadow: var(--shadow); }
   .task-card:hover { border-color: var(--border-strong); }
   .task-card.done { opacity: 0.5; }
   .task-card.done .task-name { text-decoration: line-through; color: var(--text-subtle); }
   .check-btn { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border-strong); background: transparent; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: all 0.2s; }
   .check-btn:hover { border-color: var(--accent); background: var(--accent-bg); }
   .check-btn.done { background: var(--accent); border-color: var(--accent); color: white; }
-  .task-name { flex: 1; font-size: 14px; color: var(--text); word-break: break-word; }
+  .task-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .task-name { font-size: 14px; color: var(--text); word-break: break-word; }
+  .task-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .cat-tag { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
   .xp-badge { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 10px; flex-shrink: 0; }
   .xp-sm { background: var(--success-bg); color: var(--success); }
   .xp-md { background: var(--info-bg); color: var(--info); }
@@ -129,11 +141,9 @@
   .del-btn:hover { opacity: 1; color: var(--danger); }
   .empty { font-size: 13px; color: var(--text-subtle); text-align: center; padding: 2rem 0; }
 
-  /* Focus btn */
   .focus-btn { width: 100%; padding: 11px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--surface); color: var(--text-muted); font-size: 13px; cursor: pointer; margin-top: 8px; font-family: inherit; }
   .focus-btn:hover { background: var(--surface-2); color: var(--text); }
 
-  /* Achievements */
   .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
   .ach { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 12px; box-shadow: var(--shadow); }
   .ach.unlocked { background: var(--warn-bg); border-color: var(--warn); }
@@ -144,15 +154,25 @@
   .ach .ach-desc { color: var(--text-muted); font-size: 11px; }
   .ach.locked { opacity: 0.55; }
 
-  /* Toast */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
+  .modal-bg.show { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius-lg); border: 0.5px solid var(--border); padding: 1.5rem; max-width: 460px; width: 100%; max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-size: 16px; font-weight: 500; margin-bottom: 1rem; }
+  .modal-close { float: right; background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; }
+  .cat-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
+  .cat-row { display: flex; gap: 8px; align-items: center; padding: 8px; background: var(--surface-2); border-radius: var(--radius-sm); flex-wrap: wrap; }
+  .cat-row input[type="text"] { flex: 1 1 120px; min-width: 100px; border: 0.5px solid var(--border); padding: 6px 10px; border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: 13px; font-family: inherit; outline: none; }
+  .swatch-picker { display: flex; gap: 4px; flex-wrap: wrap; }
+  .swatch { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 1.5px solid var(--border); flex-shrink: 0; }
+  .new-cat-row { display: flex; gap: 6px; margin-top: 8px; }
+  .new-cat-row input { flex: 1; padding: 7px 10px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm); font-size: 13px; background: var(--surface); color: var(--text); font-family: inherit; outline: none; }
+
   .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--accent-strong); color: white; font-size: 14px; font-weight: 500; padding: 10px 22px; border-radius: 22px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 99; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* Footer */
   .footer { text-align: center; font-size: 11px; color: var(--text-subtle); margin-top: 2rem; }
   .footer button { background: none; border: none; color: var(--text-subtle); cursor: pointer; text-decoration: underline; font-family: inherit; font-size: 11px; }
   .footer button:hover { color: var(--danger); }
-
   .section-label { font-size: 11px; font-weight: 500; color: var(--text-subtle); letter-spacing: 0.08em; text-transform: uppercase; margin: 1rem 0 8px; }
 </style>
 </head>
@@ -194,9 +214,11 @@
     </div>
 
     <div id="panelActive">
+      <div class="cat-filters" id="catFilters"></div>
       <div class="add-row">
         <input id="taskInput" type="text" placeholder="Add a quest..." onkeydown="if(event.key==='Enter')addTask()" />
-        <select class="xp-select" id="xpPick">
+        <select class="picker" id="catPick"></select>
+        <select class="picker" id="xpPick">
           <option value="10">+10 XP (quick)</option>
           <option value="25" selected>+25 XP (normal)</option>
           <option value="50">+50 XP (hard)</option>
@@ -209,6 +231,7 @@
     </div>
 
     <div id="panelDone" style="display:none">
+      <div class="cat-filters" id="catFiltersDone"></div>
       <div class="task-list" id="doneList"></div>
     </div>
 
@@ -222,11 +245,44 @@
     </div>
   </div>
 
+  <div class="modal-bg" id="catModal" onclick="if(event.target.id==='catModal')closeCatModal()">
+    <div class="modal">
+      <button class="modal-close" onclick="closeCatModal()">✕</button>
+      <div class="modal-title">Manage categories</div>
+      <div class="cat-list" id="catEditList"></div>
+      <div class="new-cat-row">
+        <input id="newCatName" type="text" placeholder="New category name..." maxlength="20" onkeydown="if(event.key==='Enter')addCategory()" />
+        <button class="btn-ghost" onclick="addCategory()">+ Add</button>
+      </div>
+      <p style="font-size: 11px; color: var(--text-subtle); margin-top: 12px; line-height: 1.5;">Click a colored circle to change color. Deleting a category moves its tasks to General.</p>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'task-quest-v1';
+const STORAGE_KEY = 'task-quest-v2';
+const LEGACY_KEY  = 'task-quest-v1';
 const XP_LEVELS = [0, 100, 250, 500, 1000, 2000, 3500, 5500, 8000, 12000, 20000, 30000];
+
+const COLOR_PALETTE = [
+  { id: 'purple', bg: 'var(--accent-bg)',  fg: 'var(--accent-strong)', dot: '#7f77dd' },
+  { id: 'info',   bg: 'var(--info-bg)',    fg: 'var(--info)',          dot: '#378add' },
+  { id: 'teal',   bg: 'var(--teal-bg)',    fg: 'var(--teal)',          dot: '#1d9e75' },
+  { id: 'green',  bg: 'var(--success-bg)', fg: 'var(--success)',       dot: '#639922' },
+  { id: 'amber',  bg: 'var(--warn-bg)',    fg: 'var(--warn)',          dot: '#ba7517' },
+  { id: 'coral',  bg: 'var(--danger-bg)',  fg: 'var(--danger)',        dot: '#d85a30' },
+  { id: 'pink',   bg: 'var(--pink-bg)',    fg: 'var(--pink)',          dot: '#d4537e' },
+  { id: 'gray',   bg: 'var(--gray-bg)',    fg: 'var(--gray)',          dot: '#888780' },
+];
+
+const DEFAULT_CATEGORIES = [
+  { id: 'general',  name: 'General',  color: 'gray' },
+  { id: 'work',     name: 'Work',     color: 'info' },
+  { id: 'personal', name: 'Personal', color: 'purple' },
+  { id: 'health',   name: 'Health',   color: 'green' },
+  { id: 'learning', name: 'Learning', color: 'amber' },
+];
 
 const ACHIEVEMENTS = [
   { id: 'first', icon: '⚔', label: 'First blood', desc: 'Complete 1 task', check: s => s.doneCount >= 1 },
@@ -239,18 +295,23 @@ const ACHIEVEMENTS = [
   { id: 'epic', icon: '🔥', label: 'Epic deed', desc: 'Complete an epic task', check: s => s.tasks.some(t => t.done && t.xp === 100) },
   { id: 'focus', icon: '🎯', label: 'Focused', desc: 'Complete a focus session', check: s => s.focusSessions >= 1 },
   { id: 'focus5', icon: '🧘', label: 'Deep worker', desc: 'Complete 5 focus sessions', check: s => s.focusSessions >= 5 },
+  { id: 'wellrounded', icon: '🎨', label: 'Well-rounded', desc: 'Complete tasks in 3 categories', check: s => {
+    const cats = new Set(s.tasks.filter(t => t.done).map(t => t.category));
+    return cats.size >= 3;
+  }},
 ];
 
-// State
 let state = loadState();
+let activeFilter = 'all';
 
 function defaultState() {
   return {
     tasks: [
-      { id: 1, name: 'Plan my top 3 priorities for today', xp: 25, done: false },
-      { id: 2, name: 'Clear email inbox', xp: 10, done: false },
-      { id: 3, name: 'Work on most important project', xp: 100, done: false },
+      { id: 1, name: 'Plan my top 3 priorities for today', xp: 25, done: false, category: 'work' },
+      { id: 2, name: 'Clear email inbox',                  xp: 10, done: false, category: 'work' },
+      { id: 3, name: 'Work on most important project',     xp: 100, done: false, category: 'work' },
     ],
+    categories: DEFAULT_CATEGORIES.slice(),
     totalXP: 0,
     doneCount: 0,
     focusSessions: 0,
@@ -260,10 +321,28 @@ function defaultState() {
 
 function loadState() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultState();
+    let raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      const legacy = localStorage.getItem(LEGACY_KEY);
+      if (legacy) {
+        const old = JSON.parse(legacy);
+        const migrated = {
+          ...defaultState(),
+          ...old,
+          categories: DEFAULT_CATEGORIES.slice(),
+          tasks: (old.tasks || []).map(t => ({ ...t, category: t.category || 'general' })),
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+        return migrated;
+      }
+      return defaultState();
+    }
     const parsed = JSON.parse(raw);
-    return { ...defaultState(), ...parsed, unlockedAchs: parsed.unlockedAchs || [] };
+    const merged = { ...defaultState(), ...parsed };
+    merged.unlockedAchs = parsed.unlockedAchs || [];
+    merged.categories = parsed.categories && parsed.categories.length ? parsed.categories : DEFAULT_CATEGORIES.slice();
+    merged.tasks = (parsed.tasks || []).map(t => ({ ...t, category: t.category || 'general' }));
+    return merged;
   } catch (e) {
     return defaultState();
   }
@@ -285,11 +364,12 @@ function getLevelXP() {
   return { current, next, pct: Math.round(((state.totalXP - current) / (next - current)) * 100) };
 }
 
-// Timer
+function getColor(id) { return COLOR_PALETTE.find(c => c.id === id) || COLOR_PALETTE[7]; }
+function getCategory(id) { return state.categories.find(c => c.id === id) || state.categories[0]; }
+
 let timerInterval = null;
 let timerSeconds = 25 * 60;
 let timerRunning = false;
-let timerTotal = 25 * 60;
 
 function render() {
   const lvl = getLevel(state.totalXP);
@@ -304,39 +384,82 @@ function render() {
     ? `<b>${state.doneCount}</b> quest${state.doneCount === 1 ? '' : 's'} slain — keep going!`
     : 'Complete quests to earn XP and level up!';
 
-  const active = state.tasks.filter(t => !t.done);
-  const done = state.tasks.filter(t => t.done);
+  renderCatPicker();
+  renderCatFilters('catFilters', false);
+  renderCatFilters('catFiltersDone', true);
+  renderTaskLists();
+  renderAchievements();
+}
+
+function renderCatPicker() {
+  const sel = document.getElementById('catPick');
+  const prev = sel.value;
+  sel.innerHTML = state.categories.map(c => `<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
+  if (state.categories.find(c => c.id === prev)) sel.value = prev;
+}
+
+function renderCatFilters(elemId, isDoneTab) {
+  const wrap = document.getElementById(elemId);
+  const tasks = state.tasks.filter(t => isDoneTab ? t.done : !t.done);
+  const allCount = tasks.length;
+  let html = `<button class="cat-chip${activeFilter==='all'?' active':''}" style="${activeFilter==='all'?'background:var(--surface-2);color:var(--text);border-color:var(--border-strong);':''}" onclick="setFilter('all')">All <span class="count">${allCount}</span></button>`;
+  state.categories.forEach(cat => {
+    const count = tasks.filter(t => t.category === cat.id).length;
+    if (count === 0 && cat.id !== 'general') return;
+    const col = getColor(cat.color);
+    const isActive = activeFilter === cat.id;
+    const style = isActive ? `background:${col.bg};color:${col.fg};border-color:${col.dot};` : ``;
+    html += `<button class="cat-chip${isActive?' active':''}" style="${style}" onclick="setFilter('${cat.id}')">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${col.dot};"></span>
+      ${escHtml(cat.name)} <span class="count">${count}</span>
+    </button>`;
+  });
+  if (!isDoneTab) html += `<button class="cat-chip-manage" onclick="openCatModal()">⚙ Manage</button>`;
+  wrap.innerHTML = html;
+}
+
+function renderTaskLists() {
+  const filterFn = t => activeFilter === 'all' || t.category === activeFilter;
+  const active = state.tasks.filter(t => !t.done && filterFn(t));
+  const done   = state.tasks.filter(t =>  t.done && filterFn(t));
 
   document.getElementById('activeList').innerHTML = active.length === 0
-    ? '<div class="empty">No active quests. Add one above!</div>'
+    ? '<div class="empty">No active quests in this view.</div>'
     : active.map(taskHTML).join('');
 
   document.getElementById('doneList').innerHTML = done.length === 0
-    ? '<div class="empty">No completed quests yet.</div>'
+    ? '<div class="empty">No completed quests in this view.</div>'
     : done.map(taskHTML).join('');
-
-  renderAchievements();
 }
 
 function taskHTML(t) {
   const cls = t.xp === 10 ? 'xp-sm' : t.xp === 25 ? 'xp-md' : t.xp === 50 ? 'xp-lg' : 'xp-xl';
-  const label = `+${t.xp} XP`;
+  const cat = getCategory(t.category);
+  const col = getColor(cat.color);
   return `<div class="task-card${t.done ? ' done' : ''}">
     <button class="check-btn${t.done ? ' done' : ''}" onclick="toggleTask(${t.id})" aria-label="${t.done ? 'Uncheck' : 'Check'}">${t.done ? '✓' : ''}</button>
-    <span class="task-name">${escHtml(t.name)}</span>
-    <span class="xp-badge ${cls}">${label}</span>
+    <div class="task-body">
+      <div class="task-name">${escHtml(t.name)}</div>
+      <div class="task-meta">
+        <span class="cat-tag" style="background:${col.bg};color:${col.fg};">${escHtml(cat.name)}</span>
+      </div>
+    </div>
+    <span class="xp-badge ${cls}">+${t.xp} XP</span>
     <button class="del-btn" onclick="deleteTask(${t.id})" aria-label="Delete">✕</button>
   </div>`;
 }
 
 function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
+function setFilter(id) { activeFilter = id; render(); }
+
 function addTask() {
   const inp = document.getElementById('taskInput');
   const name = inp.value.trim();
   if (!name) return;
   const xp = parseInt(document.getElementById('xpPick').value, 10);
-  state.tasks.unshift({ id: Date.now(), name, xp, done: false });
+  const category = document.getElementById('catPick').value;
+  state.tasks.unshift({ id: Date.now(), name, xp, done: false, category });
   inp.value = '';
   saveState(); render();
 }
@@ -397,6 +520,61 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2400);
 }
 
+/* Categories modal */
+function openCatModal() { renderCatEditList(); document.getElementById('catModal').classList.add('show'); }
+function closeCatModal() { document.getElementById('catModal').classList.remove('show'); }
+
+function renderCatEditList() {
+  const list = document.getElementById('catEditList');
+  list.innerHTML = state.categories.map(cat => {
+    const swatches = COLOR_PALETTE.map(c => `
+      <span class="swatch" style="background:${c.dot};${c.id===cat.color?'border-color:var(--text);border-width:2.5px':''}" onclick="setCatColor('${cat.id}','${c.id}')" title="${c.id}"></span>
+    `).join('');
+    const canDelete = cat.id !== 'general';
+    return `<div class="cat-row">
+      <div class="swatch-picker">${swatches}</div>
+      <input type="text" value="${escHtml(cat.name)}" maxlength="20" onchange="renameCategory('${cat.id}', this.value)" />
+      ${canDelete ? `<button class="del-btn" onclick="deleteCategory('${cat.id}')" style="opacity:0.7;">✕</button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function addCategory() {
+  const inp = document.getElementById('newCatName');
+  const name = inp.value.trim();
+  if (!name) return;
+  const id = 'c_' + Date.now();
+  const used = new Set(state.categories.map(c => c.color));
+  const color = (COLOR_PALETTE.find(c => !used.has(c.id)) || COLOR_PALETTE[0]).id;
+  state.categories.push({ id, name, color });
+  inp.value = '';
+  saveState(); renderCatEditList(); render();
+}
+
+function renameCategory(id, name) {
+  const cat = state.categories.find(c => c.id === id);
+  if (!cat) return;
+  cat.name = name.trim() || cat.name;
+  saveState(); render();
+}
+
+function setCatColor(id, color) {
+  const cat = state.categories.find(c => c.id === id);
+  if (!cat) return;
+  cat.color = color;
+  saveState(); renderCatEditList(); render();
+}
+
+function deleteCategory(id) {
+  if (id === 'general') return;
+  if (!confirm('Delete this category? Its tasks will move to General.')) return;
+  state.categories = state.categories.filter(c => c.id !== id);
+  state.tasks.forEach(t => { if (t.category === id) t.category = 'general'; });
+  if (activeFilter === id) activeFilter = 'all';
+  saveState(); renderCatEditList(); render();
+}
+
+/* Timer */
 function openTimer() { document.getElementById('timerSection').style.display = 'block'; resetTimer(); }
 function closeTimer() {
   clearInterval(timerInterval); timerRunning = false;
@@ -436,9 +614,11 @@ function toggleTimer() {
 }
 
 function resetAll() {
-  if (!confirm('This will erase all your tasks, XP, and achievements. Continue?')) return;
+  if (!confirm('This will erase all your tasks, XP, achievements, and categories. Continue?')) return;
   localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(LEGACY_KEY);
   state = defaultState();
+  activeFilter = 'all';
   render();
 }
 
