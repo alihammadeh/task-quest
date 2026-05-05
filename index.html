@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Task Quest</title>
+<style>
+  :root {
+    --bg: #faf9f5;
+    --surface: #ffffff;
+    --surface-2: #f1efe8;
+    --text: #1a1a1a;
+    --text-muted: #6b6a64;
+    --text-subtle: #9b9a92;
+    --border: rgba(0, 0, 0, 0.1);
+    --border-strong: rgba(0, 0, 0, 0.2);
+    --accent: #7f77dd;
+    --accent-bg: #eeedfe;
+    --accent-strong: #534ab7;
+    --accent-border: #afa9ec;
+    --success: #3b6d11;
+    --success-bg: #eaf3de;
+    --info: #185fa5;
+    --info-bg: #e6f1fb;
+    --warn: #854f0b;
+    --warn-bg: #faeeda;
+    --danger: #993c1d;
+    --danger-bg: #faece7;
+    --pink-bg: #fbeaf0;
+    --pink: #993556;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --surface: #262624;
+      --surface-2: #2c2c2a;
+      --text: #f1efe8;
+      --text-muted: #b4b2a9;
+      --text-subtle: #888780;
+      --border: rgba(255, 255, 255, 0.1);
+      --border-strong: rgba(255, 255, 255, 0.2);
+      --accent: #afa9ec;
+      --accent-bg: #2e2a4a;
+      --accent-strong: #cecbf6;
+      --accent-border: #534ab7;
+      --success: #97c459;
+      --success-bg: #1f2e0e;
+      --info: #85b7eb;
+      --info-bg: #0f2238;
+      --warn: #fac775;
+      --warn-bg: #3a2807;
+      --danger: #f0997b;
+      --danger-bg: #3a1f10;
+      --pink-bg: #3a1828;
+      --pink: #ed93b1;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 720px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
+
+  /* Header */
+  .header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 1.25rem; }
+  .title { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
+  .stats { display: flex; gap: 8px; flex-wrap: wrap; }
+  .stat-pill { display: flex; align-items: center; gap: 6px; background: var(--surface-2); border-radius: 20px; padding: 5px 12px; font-size: 13px; color: var(--text-muted); }
+  .stat-pill b { color: var(--text); font-weight: 500; }
+
+  /* XP bar */
+  .xp-bar-wrap { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px 18px; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
+  .xp-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+  .xp-track { height: 10px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
+  .xp-fill { height: 100%; border-radius: 5px; background: var(--accent); transition: width 0.5s ease; }
+  .streak { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+  .streak b { color: var(--danger); }
+
+  /* Timer */
+  .timer-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--accent-bg); border: 0.5px solid var(--accent-border); border-radius: var(--radius-lg); padding: 12px 18px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .timer-display { font-size: 28px; font-weight: 500; color: var(--accent-strong); font-variant-numeric: tabular-nums; line-height: 1; }
+  .timer-label { font-size: 12px; color: var(--accent); margin-bottom: 4px; }
+  .timer-controls { display: flex; gap: 8px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .tab { padding: 6px 14px; border-radius: 20px; font-size: 13px; border: 0.5px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; font-family: inherit; }
+  .tab:hover { background: var(--surface-2); }
+  .tab.active { background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent-strong); font-weight: 500; }
+
+  /* Add row */
+  .add-row { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .add-row input[type="text"] { flex: 1 1 180px; padding: 9px 14px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-md); font-size: 14px; background: var(--surface); color: var(--text); outline: none; font-family: inherit; }
+  .add-row input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+  .xp-select { padding: 9px 12px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-md); font-size: 13px; background: var(--surface); color: var(--text-muted); outline: none; cursor: pointer; font-family: inherit; }
+
+  button.btn-primary { padding: 9px 18px; border: 0.5px solid var(--accent-border); border-radius: var(--radius-md); background: var(--accent-bg); color: var(--accent-strong); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; font-family: inherit; }
+  button.btn-primary:hover { background: var(--accent-border); color: white; }
+  button.btn-ghost { padding: 5px 14px; border-radius: var(--radius-md); border: 0.5px solid var(--accent-border); background: transparent; color: var(--accent-strong); font-size: 13px; cursor: pointer; font-family: inherit; }
+  button.btn-ghost:hover { background: var(--accent-bg); }
+
+  /* Task list */
+  .task-list { display: flex; flex-direction: column; gap: 6px; }
+  .task-card { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 12px 16px; transition: opacity 0.3s, transform 0.2s; box-shadow: var(--shadow); }
+  .task-card:hover { border-color: var(--border-strong); }
+  .task-card.done { opacity: 0.5; }
+  .task-card.done .task-name { text-decoration: line-through; color: var(--text-subtle); }
+  .check-btn { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border-strong); background: transparent; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: all 0.2s; }
+  .check-btn:hover { border-color: var(--accent); background: var(--accent-bg); }
+  .check-btn.done { background: var(--accent); border-color: var(--accent); color: white; }
+  .task-name { flex: 1; font-size: 14px; color: var(--text); word-break: break-word; }
+  .xp-badge { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 10px; flex-shrink: 0; }
+  .xp-sm { background: var(--success-bg); color: var(--success); }
+  .xp-md { background: var(--info-bg); color: var(--info); }
+  .xp-lg { background: var(--warn-bg); color: var(--warn); }
+  .xp-xl { background: var(--danger-bg); color: var(--danger); }
+  .del-btn { background: none; border: none; font-size: 16px; color: var(--text-subtle); cursor: pointer; padding: 2px 6px; opacity: 0.5; flex-shrink: 0; font-family: inherit; }
+  .del-btn:hover { opacity: 1; color: var(--danger); }
+  .empty { font-size: 13px; color: var(--text-subtle); text-align: center; padding: 2rem 0; }
+
+  /* Focus btn */
+  .focus-btn { width: 100%; padding: 11px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--surface); color: var(--text-muted); font-size: 13px; cursor: pointer; margin-top: 8px; font-family: inherit; }
+  .focus-btn:hover { background: var(--surface-2); color: var(--text); }
+
+  /* Achievements */
+  .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  .ach { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 12px; box-shadow: var(--shadow); }
+  .ach.unlocked { background: var(--warn-bg); border-color: var(--warn); }
+  .ach .ach-icon { font-size: 20px; flex-shrink: 0; }
+  .ach .ach-text { font-size: 12px; }
+  .ach .ach-label { font-weight: 500; color: var(--text); }
+  .ach.unlocked .ach-label { color: var(--warn); }
+  .ach .ach-desc { color: var(--text-muted); font-size: 11px; }
+  .ach.locked { opacity: 0.55; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--accent-strong); color: white; font-size: 14px; font-weight: 500; padding: 10px 22px; border-radius: 22px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 99; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Footer */
+  .footer { text-align: center; font-size: 11px; color: var(--text-subtle); margin-top: 2rem; }
+  .footer button { background: none; border: none; color: var(--text-subtle); cursor: pointer; text-decoration: underline; font-family: inherit; font-size: 11px; }
+  .footer button:hover { color: var(--danger); }
+
+  .section-label { font-size: 11px; font-weight: 500; color: var(--text-subtle); letter-spacing: 0.08em; text-transform: uppercase; margin: 1rem 0 8px; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">⚔ Task Quest</div>
+      <div class="stats">
+        <div class="stat-pill">Level <b id="level">1</b></div>
+        <div class="stat-pill"><b id="totalXP">0</b> XP</div>
+        <div class="stat-pill"><b id="doneCount">0</b> done</div>
+      </div>
+    </div>
+
+    <div class="xp-bar-wrap">
+      <div class="xp-label"><span>Level <span id="lvlA">1</span></span><span id="xpProg">0 / 100 XP</span></div>
+      <div class="xp-track"><div class="xp-fill" id="xpBar" style="width:0%"></div></div>
+      <div class="streak" id="streakMsg">Complete quests to earn XP and level up!</div>
+    </div>
+
+    <div id="timerSection" style="display:none">
+      <div class="timer-row">
+        <div>
+          <div class="timer-label" id="timerLabel">Focus session</div>
+          <div class="timer-display" id="timerDisplay">25:00</div>
+        </div>
+        <div class="timer-controls">
+          <button class="btn-ghost" id="timerToggle" onclick="toggleTimer()">Start</button>
+          <button class="btn-ghost" onclick="resetTimer()">Reset</button>
+          <button class="btn-ghost" onclick="closeTimer()">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="setTab('active',this)">Active</button>
+      <button class="tab" onclick="setTab('done',this)">Done</button>
+      <button class="tab" onclick="setTab('achievements',this)">Achievements</button>
+    </div>
+
+    <div id="panelActive">
+      <div class="add-row">
+        <input id="taskInput" type="text" placeholder="Add a quest..." onkeydown="if(event.key==='Enter')addTask()" />
+        <select class="xp-select" id="xpPick">
+          <option value="10">+10 XP (quick)</option>
+          <option value="25" selected>+25 XP (normal)</option>
+          <option value="50">+50 XP (hard)</option>
+          <option value="100">+100 XP (epic)</option>
+        </select>
+        <button class="btn-primary" onclick="addTask()">+ Add</button>
+      </div>
+      <div class="task-list" id="activeList"></div>
+      <button class="focus-btn" onclick="openTimer()">⏱ Start 25-min focus session</button>
+    </div>
+
+    <div id="panelDone" style="display:none">
+      <div class="task-list" id="doneList"></div>
+    </div>
+
+    <div id="panelAchievements" style="display:none">
+      <div class="section-label">Badges</div>
+      <div class="ach-grid" id="achRow"></div>
+    </div>
+
+    <div class="footer">
+      Your data is saved locally in this browser. <button onclick="resetAll()">Reset everything</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'task-quest-v1';
+const XP_LEVELS = [0, 100, 250, 500, 1000, 2000, 3500, 5500, 8000, 12000, 20000, 30000];
+
+const ACHIEVEMENTS = [
+  { id: 'first', icon: '⚔', label: 'First blood', desc: 'Complete 1 task', check: s => s.doneCount >= 1 },
+  { id: 'five', icon: '🏆', label: 'On a roll', desc: 'Complete 5 tasks', check: s => s.doneCount >= 5 },
+  { id: 'ten', icon: '💎', label: 'Unstoppable', desc: 'Complete 10 tasks', check: s => s.doneCount >= 10 },
+  { id: 'twentyfive', icon: '🚀', label: 'Productivity machine', desc: 'Complete 25 tasks', check: s => s.doneCount >= 25 },
+  { id: 'lvl3', icon: '🌟', label: 'Rising star', desc: 'Reach level 3', check: s => getLevel(s.totalXP) >= 3 },
+  { id: 'lvl5', icon: '👑', label: 'Quest master', desc: 'Reach level 5', check: s => getLevel(s.totalXP) >= 5 },
+  { id: 'lvl10', icon: '⭐', label: 'Legend', desc: 'Reach level 10', check: s => getLevel(s.totalXP) >= 10 },
+  { id: 'epic', icon: '🔥', label: 'Epic deed', desc: 'Complete an epic task', check: s => s.tasks.some(t => t.done && t.xp === 100) },
+  { id: 'focus', icon: '🎯', label: 'Focused', desc: 'Complete a focus session', check: s => s.focusSessions >= 1 },
+  { id: 'focus5', icon: '🧘', label: 'Deep worker', desc: 'Complete 5 focus sessions', check: s => s.focusSessions >= 5 },
+];
+
+// State
+let state = loadState();
+
+function defaultState() {
+  return {
+    tasks: [
+      { id: 1, name: 'Plan my top 3 priorities for today', xp: 25, done: false },
+      { id: 2, name: 'Clear email inbox', xp: 10, done: false },
+      { id: 3, name: 'Work on most important project', xp: 100, done: false },
+    ],
+    totalXP: 0,
+    doneCount: 0,
+    focusSessions: 0,
+    unlockedAchs: [],
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    return { ...defaultState(), ...parsed, unlockedAchs: parsed.unlockedAchs || [] };
+  } catch (e) {
+    return defaultState();
+  }
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function getLevel(xp) {
+  for (let i = XP_LEVELS.length - 1; i >= 0; i--) if (xp >= XP_LEVELS[i]) return i + 1;
+  return 1;
+}
+
+function getLevelXP() {
+  const lvl = getLevel(state.totalXP) - 1;
+  const current = XP_LEVELS[lvl] || 0;
+  const next = XP_LEVELS[lvl + 1] || (XP_LEVELS[lvl] + 500);
+  return { current, next, pct: Math.round(((state.totalXP - current) / (next - current)) * 100) };
+}
+
+// Timer
+let timerInterval = null;
+let timerSeconds = 25 * 60;
+let timerRunning = false;
+let timerTotal = 25 * 60;
+
+function render() {
+  const lvl = getLevel(state.totalXP);
+  document.getElementById('level').textContent = lvl;
+  document.getElementById('totalXP').textContent = state.totalXP;
+  document.getElementById('doneCount').textContent = state.doneCount;
+  document.getElementById('lvlA').textContent = lvl;
+  const lx = getLevelXP();
+  document.getElementById('xpProg').textContent = `${state.totalXP - lx.current} / ${lx.next - lx.current} XP`;
+  document.getElementById('xpBar').style.width = lx.pct + '%';
+  document.getElementById('streakMsg').innerHTML = state.doneCount > 0
+    ? `<b>${state.doneCount}</b> quest${state.doneCount === 1 ? '' : 's'} slain — keep going!`
+    : 'Complete quests to earn XP and level up!';
+
+  const active = state.tasks.filter(t => !t.done);
+  const done = state.tasks.filter(t => t.done);
+
+  document.getElementById('activeList').innerHTML = active.length === 0
+    ? '<div class="empty">No active quests. Add one above!</div>'
+    : active.map(taskHTML).join('');
+
+  document.getElementById('doneList').innerHTML = done.length === 0
+    ? '<div class="empty">No completed quests yet.</div>'
+    : done.map(taskHTML).join('');
+
+  renderAchievements();
+}
+
+function taskHTML(t) {
+  const cls = t.xp === 10 ? 'xp-sm' : t.xp === 25 ? 'xp-md' : t.xp === 50 ? 'xp-lg' : 'xp-xl';
+  const label = `+${t.xp} XP`;
+  return `<div class="task-card${t.done ? ' done' : ''}">
+    <button class="check-btn${t.done ? ' done' : ''}" onclick="toggleTask(${t.id})" aria-label="${t.done ? 'Uncheck' : 'Check'}">${t.done ? '✓' : ''}</button>
+    <span class="task-name">${escHtml(t.name)}</span>
+    <span class="xp-badge ${cls}">${label}</span>
+    <button class="del-btn" onclick="deleteTask(${t.id})" aria-label="Delete">✕</button>
+  </div>`;
+}
+
+function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function addTask() {
+  const inp = document.getElementById('taskInput');
+  const name = inp.value.trim();
+  if (!name) return;
+  const xp = parseInt(document.getElementById('xpPick').value, 10);
+  state.tasks.unshift({ id: Date.now(), name, xp, done: false });
+  inp.value = '';
+  saveState(); render();
+}
+
+function toggleTask(id) {
+  const t = state.tasks.find(t => t.id === id);
+  if (!t) return;
+  const prevLvl = getLevel(state.totalXP);
+  t.done = !t.done;
+  if (t.done) { state.totalXP += t.xp; state.doneCount++; }
+  else { state.totalXP = Math.max(0, state.totalXP - t.xp); state.doneCount = Math.max(0, state.doneCount - 1); }
+  const newLvl = getLevel(state.totalXP);
+  if (t.done) {
+    showToast(`+${t.xp} XP earned!${newLvl > prevLvl ? ' 🎉 Level up! Now level ' + newLvl : ''}`);
+  }
+  checkAchievements();
+  saveState(); render();
+}
+
+function deleteTask(id) {
+  state.tasks = state.tasks.filter(t => t.id !== id);
+  saveState(); render();
+}
+
+function checkAchievements() {
+  ACHIEVEMENTS.forEach(a => {
+    if (!state.unlockedAchs.includes(a.id) && a.check(state)) {
+      state.unlockedAchs.push(a.id);
+      showToast(`${a.icon} Achievement: ${a.label}`);
+    }
+  });
+}
+
+function renderAchievements() {
+  document.getElementById('achRow').innerHTML = ACHIEVEMENTS.map(a => {
+    const unlocked = state.unlockedAchs.includes(a.id);
+    return `<div class="ach ${unlocked ? 'unlocked' : 'locked'}">
+      <span class="ach-icon">${a.icon}</span>
+      <div class="ach-text">
+        <div class="ach-label">${a.label}</div>
+        <div class="ach-desc">${a.desc}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['active', 'done', 'achievements'].forEach(p => {
+    document.getElementById('panel' + p.charAt(0).toUpperCase() + p.slice(1)).style.display = p === tab ? '' : 'none';
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+function openTimer() { document.getElementById('timerSection').style.display = 'block'; resetTimer(); }
+function closeTimer() {
+  clearInterval(timerInterval); timerRunning = false;
+  document.getElementById('timerSection').style.display = 'none';
+  document.getElementById('timerToggle').textContent = 'Start';
+}
+function resetTimer() {
+  clearInterval(timerInterval); timerRunning = false;
+  timerSeconds = 25 * 60;
+  document.getElementById('timerDisplay').textContent = '25:00';
+  document.getElementById('timerLabel').textContent = 'Focus session';
+  document.getElementById('timerToggle').textContent = 'Start';
+}
+function toggleTimer() {
+  if (timerRunning) {
+    clearInterval(timerInterval); timerRunning = false;
+    document.getElementById('timerToggle').textContent = 'Resume';
+  } else {
+    timerRunning = true;
+    document.getElementById('timerToggle').textContent = 'Pause';
+    document.getElementById('timerLabel').textContent = 'Focus session — stay locked in!';
+    timerInterval = setInterval(() => {
+      timerSeconds--;
+      const m = Math.floor(timerSeconds / 60), s = timerSeconds % 60;
+      document.getElementById('timerDisplay').textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+      if (timerSeconds <= 0) {
+        clearInterval(timerInterval); timerRunning = false;
+        document.getElementById('timerToggle').textContent = 'Start';
+        state.focusSessions = (state.focusSessions || 0) + 1;
+        state.totalXP += 15;
+        showToast('🎯 Session complete! +15 bonus XP');
+        checkAchievements();
+        saveState(); render();
+      }
+    }, 1000);
+  }
+}
+
+function resetAll() {
+  if (!confirm('This will erase all your tasks, XP, and achievements. Continue?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state = defaultState();
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
