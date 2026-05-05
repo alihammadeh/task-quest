@@ -121,10 +121,14 @@
   button.btn-ghost:hover { background: var(--accent-bg); }
 
   .task-list { display: flex; flex-direction: column; gap: 6px; }
-  .task-card { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 12px 16px; transition: opacity 0.3s; box-shadow: var(--shadow); }
+  .task-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-md); transition: opacity 0.3s, border-color 0.2s; box-shadow: var(--shadow); overflow: hidden; }
+  .task-card.timing { border-color: var(--accent); border-width: 1px; box-shadow: 0 0 0 2px var(--accent-bg); }
   .task-card:hover { border-color: var(--border-strong); }
+  .task-card.timing:hover { border-color: var(--accent); }
   .task-card.done { opacity: 0.5; }
   .task-card.done .task-name { text-decoration: line-through; color: var(--text-subtle); }
+
+  .task-main { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; }
   .check-btn { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border-strong); background: transparent; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: all 0.2s; }
   .check-btn:hover { border-color: var(--accent); background: var(--accent-bg); }
   .check-btn.done { background: var(--accent); border-color: var(--accent); color: white; }
@@ -132,13 +136,38 @@
   .task-name { font-size: 14px; color: var(--text); word-break: break-word; }
   .task-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
   .cat-tag { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .time-pill { font-size: 11px; color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px; }
+  .time-pill.live { color: var(--accent-strong); font-weight: 500; }
+  .desc-icon { font-size: 11px; color: var(--text-subtle); }
   .xp-badge { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 10px; flex-shrink: 0; }
   .xp-sm { background: var(--success-bg); color: var(--success); }
   .xp-md { background: var(--info-bg); color: var(--info); }
   .xp-lg { background: var(--warn-bg); color: var(--warn); }
   .xp-xl { background: var(--danger-bg); color: var(--danger); }
+  .expand-arrow { font-size: 11px; color: var(--text-subtle); transition: transform 0.2s; flex-shrink: 0; }
+  .task-card.expanded .expand-arrow { transform: rotate(90deg); }
   .del-btn { background: none; border: none; font-size: 16px; color: var(--text-subtle); cursor: pointer; padding: 2px 6px; opacity: 0.5; flex-shrink: 0; font-family: inherit; }
   .del-btn:hover { opacity: 1; color: var(--danger); }
+
+  .task-detail { padding: 0 16px 14px 54px; display: none; border-top: 0.5px solid var(--border); padding-top: 12px; }
+  .task-card.expanded .task-detail { display: block; }
+  .desc-area { width: 100%; min-height: 60px; padding: 8px 12px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text); font-size: 13px; font-family: inherit; outline: none; resize: vertical; line-height: 1.55; }
+  .desc-area:focus { border-color: var(--accent); background: var(--surface); }
+  .desc-area::placeholder { color: var(--text-subtle); }
+
+  .timer-mini { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 10px 14px; background: var(--surface-2); border-radius: var(--radius-md); flex-wrap: wrap; }
+  .task-card.timing .timer-mini { background: var(--accent-bg); }
+  .timer-mini-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; flex: 1; }
+  .timer-mini-display { font-size: 18px; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
+  .task-card.timing .timer-mini-display { color: var(--accent-strong); }
+  .timer-mini-controls { display: flex; gap: 6px; }
+  .timer-btn { padding: 6px 14px; border-radius: var(--radius-sm); border: 0.5px solid var(--border-strong); background: var(--surface); color: var(--text); font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .timer-btn:hover { border-color: var(--accent); color: var(--accent-strong); }
+  .timer-btn.start { background: var(--accent); color: white; border-color: var(--accent); }
+  .timer-btn.start:hover { background: var(--accent-strong); border-color: var(--accent-strong); color: white; }
+  .timer-btn.pause { background: var(--warn-bg); color: var(--warn); border-color: var(--warn); }
+  .timer-btn.complete { background: var(--success-bg); color: var(--success); border-color: var(--success); }
+
   .empty { font-size: 13px; color: var(--text-subtle); text-align: center; padding: 2rem 0; }
 
   .focus-btn { width: 100%; padding: 11px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--surface); color: var(--text-muted); font-size: 13px; cursor: pointer; margin-top: 8px; font-family: inherit; }
@@ -200,9 +229,9 @@
           <div class="timer-display" id="timerDisplay">25:00</div>
         </div>
         <div class="timer-controls">
-          <button class="btn-ghost" id="timerToggle" onclick="toggleTimer()">Start</button>
-          <button class="btn-ghost" onclick="resetTimer()">Reset</button>
-          <button class="btn-ghost" onclick="closeTimer()">✕</button>
+          <button class="btn-ghost" id="timerToggle" onclick="togglePomodoro()">Start</button>
+          <button class="btn-ghost" onclick="resetPomodoro()">Reset</button>
+          <button class="btn-ghost" onclick="closePomodoro()">✕</button>
         </div>
       </div>
     </div>
@@ -227,7 +256,7 @@
         <button class="btn-primary" onclick="addTask()">+ Add</button>
       </div>
       <div class="task-list" id="activeList"></div>
-      <button class="focus-btn" onclick="openTimer()">⏱ Start 25-min focus session</button>
+      <button class="focus-btn" onclick="openPomodoro()">⏱ Start 25-min Pomodoro</button>
     </div>
 
     <div id="panelDone" style="display:none">
@@ -261,9 +290,10 @@
   <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'task-quest-v2';
-const LEGACY_KEY  = 'task-quest-v1';
+const STORAGE_KEY = 'task-quest-v3';
+const LEGACY_KEYS = ['task-quest-v2', 'task-quest-v1'];
 const XP_LEVELS = [0, 100, 250, 500, 1000, 2000, 3500, 5500, 8000, 12000, 20000, 30000];
+const TIME_XP_INTERVAL_SEC = 300; // award 1 XP per 5 minutes tracked
 
 const COLOR_PALETTE = [
   { id: 'purple', bg: 'var(--accent-bg)',  fg: 'var(--accent-strong)', dot: '#7f77dd' },
@@ -293,23 +323,26 @@ const ACHIEVEMENTS = [
   { id: 'lvl5', icon: '👑', label: 'Quest master', desc: 'Reach level 5', check: s => getLevel(s.totalXP) >= 5 },
   { id: 'lvl10', icon: '⭐', label: 'Legend', desc: 'Reach level 10', check: s => getLevel(s.totalXP) >= 10 },
   { id: 'epic', icon: '🔥', label: 'Epic deed', desc: 'Complete an epic task', check: s => s.tasks.some(t => t.done && t.xp === 100) },
-  { id: 'focus', icon: '🎯', label: 'Focused', desc: 'Complete a focus session', check: s => s.focusSessions >= 1 },
-  { id: 'focus5', icon: '🧘', label: 'Deep worker', desc: 'Complete 5 focus sessions', check: s => s.focusSessions >= 5 },
+  { id: 'focus', icon: '🎯', label: 'Focused', desc: 'Complete a Pomodoro', check: s => s.focusSessions >= 1 },
+  { id: 'focus5', icon: '🧘', label: 'Deep worker', desc: 'Complete 5 Pomodoros', check: s => s.focusSessions >= 5 },
   { id: 'wellrounded', icon: '🎨', label: 'Well-rounded', desc: 'Complete tasks in 3 categories', check: s => {
     const cats = new Set(s.tasks.filter(t => t.done).map(t => t.category));
     return cats.size >= 3;
   }},
+  { id: 'hour1', icon: '⏰', label: 'Logged in', desc: 'Track 1 hour on tasks', check: s => totalTrackedSec(s) >= 3600 },
+  { id: 'hour10', icon: '⏳', label: 'Time master', desc: 'Track 10 hours on tasks', check: s => totalTrackedSec(s) >= 36000 },
 ];
 
 let state = loadState();
 let activeFilter = 'all';
+let expandedTaskId = null;
 
 function defaultState() {
   return {
     tasks: [
-      { id: 1, name: 'Plan my top 3 priorities for today', xp: 25, done: false, category: 'work' },
-      { id: 2, name: 'Clear email inbox',                  xp: 10, done: false, category: 'work' },
-      { id: 3, name: 'Work on most important project',     xp: 100, done: false, category: 'work' },
+      { id: 1, name: 'Plan my top 3 priorities for today', desc: '', xp: 25, done: false, category: 'work', trackedSec: 0, timerStartedAt: null, xpFromTime: 0 },
+      { id: 2, name: 'Clear email inbox',                  desc: '', xp: 10, done: false, category: 'work', trackedSec: 0, timerStartedAt: null, xpFromTime: 0 },
+      { id: 3, name: 'Work on most important project',     desc: '', xp: 100, done: false, category: 'work', trackedSec: 0, timerStartedAt: null, xpFromTime: 0 },
     ],
     categories: DEFAULT_CATEGORIES.slice(),
     totalXP: 0,
@@ -319,21 +352,35 @@ function defaultState() {
   };
 }
 
+function migrateTask(t) {
+  return {
+    desc: '',
+    trackedSec: 0,
+    timerStartedAt: null,
+    xpFromTime: 0,
+    category: 'general',
+    ...t,
+  };
+}
+
 function loadState() {
   try {
     let raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      const legacy = localStorage.getItem(LEGACY_KEY);
-      if (legacy) {
-        const old = JSON.parse(legacy);
-        const migrated = {
-          ...defaultState(),
-          ...old,
-          categories: DEFAULT_CATEGORIES.slice(),
-          tasks: (old.tasks || []).map(t => ({ ...t, category: t.category || 'general' })),
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
-        return migrated;
+      // try migrating from any older version
+      for (const key of LEGACY_KEYS) {
+        const legacy = localStorage.getItem(key);
+        if (legacy) {
+          const old = JSON.parse(legacy);
+          const migrated = {
+            ...defaultState(),
+            ...old,
+            categories: old.categories && old.categories.length ? old.categories : DEFAULT_CATEGORIES.slice(),
+            tasks: (old.tasks || []).map(migrateTask),
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+          return migrated;
+        }
       }
       return defaultState();
     }
@@ -341,7 +388,7 @@ function loadState() {
     const merged = { ...defaultState(), ...parsed };
     merged.unlockedAchs = parsed.unlockedAchs || [];
     merged.categories = parsed.categories && parsed.categories.length ? parsed.categories : DEFAULT_CATEGORIES.slice();
-    merged.tasks = (parsed.tasks || []).map(t => ({ ...t, category: t.category || 'general' }));
+    merged.tasks = (parsed.tasks || []).map(migrateTask);
     return merged;
   } catch (e) {
     return defaultState();
@@ -367,9 +414,105 @@ function getLevelXP() {
 function getColor(id) { return COLOR_PALETTE.find(c => c.id === id) || COLOR_PALETTE[7]; }
 function getCategory(id) { return state.categories.find(c => c.id === id) || state.categories[0]; }
 
-let timerInterval = null;
-let timerSeconds = 25 * 60;
-let timerRunning = false;
+/* ----- Time tracking ----- */
+function getCurrentTimerTask() {
+  return state.tasks.find(t => t.timerStartedAt != null);
+}
+
+// effective tracked seconds, including any currently-running timer
+function effTrackedSec(t) {
+  if (!t.timerStartedAt) return t.trackedSec || 0;
+  const elapsed = Math.floor((Date.now() - t.timerStartedAt) / 1000);
+  return (t.trackedSec || 0) + elapsed;
+}
+
+function totalTrackedSec(s) {
+  return s.tasks.reduce((acc, t) => acc + effTrackedSec(t), 0);
+}
+
+function formatDuration(sec) {
+  if (sec < 60) return sec + 's';
+  const m = Math.floor(sec / 60), s = sec % 60;
+  if (m < 60) return s > 0 ? `${m}m ${s}s` : `${m}m`;
+  const h = Math.floor(m / 60), mm = m % 60;
+  return mm > 0 ? `${h}h ${mm}m` : `${h}h`;
+}
+
+function startTimer(taskId) {
+  const t = state.tasks.find(t => t.id === taskId);
+  if (!t || t.done) return;
+  // pause any currently running timer
+  const running = getCurrentTimerTask();
+  if (running && running.id !== taskId) {
+    pauseTimer(running.id, false); // don't toast
+  }
+  t.timerStartedAt = Date.now();
+  saveState(); render();
+  showToast(`⏱ Timer started for "${truncate(t.name)}"`);
+}
+
+function pauseTimer(taskId, notify = true) {
+  const t = state.tasks.find(t => t.id === taskId);
+  if (!t || !t.timerStartedAt) return;
+  const elapsed = Math.floor((Date.now() - t.timerStartedAt) / 1000);
+  t.trackedSec = (t.trackedSec || 0) + elapsed;
+  t.timerStartedAt = null;
+  // award XP for new time milestones
+  awardTimeXP(t);
+  saveState(); render();
+  if (notify) showToast(`⏸ Paused — total: ${formatDuration(t.trackedSec)}`);
+}
+
+function awardTimeXP(t) {
+  const earned = Math.floor((t.trackedSec || 0) / TIME_XP_INTERVAL_SEC);
+  const previously = t.xpFromTime || 0;
+  const delta = earned - previously;
+  if (delta > 0) {
+    t.xpFromTime = earned;
+    state.totalXP += delta;
+    showToast(`+${delta} bonus XP for time logged`);
+    checkAchievements();
+  }
+}
+
+function truncate(s, n = 30) { return s.length > n ? s.slice(0, n) + '...' : s; }
+
+let liveTimerInterval = null;
+function startLiveTimerLoop() {
+  if (liveTimerInterval) clearInterval(liveTimerInterval);
+  liveTimerInterval = setInterval(() => {
+    const t = getCurrentTimerTask();
+    if (!t) return;
+    // update displayed time on the running task only
+    const display = document.querySelector(`[data-task-timer-display="${t.id}"]`);
+    const pill = document.querySelector(`[data-task-timer-pill="${t.id}"]`);
+    if (display) display.textContent = formatDuration(effTrackedSec(t));
+    if (pill) pill.textContent = '⏱ ' + formatDuration(effTrackedSec(t));
+    // check for newly earned XP every tick
+    const t2 = state.tasks.find(x => x.id === t.id);
+    const currentSec = effTrackedSec(t2);
+    const earnedTotal = Math.floor(currentSec / TIME_XP_INTERVAL_SEC);
+    if (earnedTotal > (t2.xpFromTime || 0)) {
+      const delta = earnedTotal - (t2.xpFromTime || 0);
+      t2.xpFromTime = earnedTotal;
+      state.totalXP += delta;
+      showToast(`+${delta} bonus XP for time logged`);
+      checkAchievements();
+      saveState();
+      // refresh stats display only (avoid full re-render disrupting typing)
+      document.getElementById('totalXP').textContent = state.totalXP;
+      document.getElementById('level').textContent = getLevel(state.totalXP);
+      document.getElementById('lvlA').textContent = getLevel(state.totalXP);
+      const lx = getLevelXP();
+      document.getElementById('xpProg').textContent = `${state.totalXP - lx.current} / ${lx.next - lx.current} XP`;
+      document.getElementById('xpBar').style.width = lx.pct + '%';
+    }
+  }, 1000);
+}
+
+let pomoInterval = null;
+let pomoSeconds = 25 * 60;
+let pomoRunning = false;
 
 function render() {
   const lvl = getLevel(state.totalXP);
@@ -436,20 +579,82 @@ function taskHTML(t) {
   const cls = t.xp === 10 ? 'xp-sm' : t.xp === 25 ? 'xp-md' : t.xp === 50 ? 'xp-lg' : 'xp-xl';
   const cat = getCategory(t.category);
   const col = getColor(cat.color);
-  return `<div class="task-card${t.done ? ' done' : ''}">
-    <button class="check-btn${t.done ? ' done' : ''}" onclick="toggleTask(${t.id})" aria-label="${t.done ? 'Uncheck' : 'Check'}">${t.done ? '✓' : ''}</button>
-    <div class="task-body">
-      <div class="task-name">${escHtml(t.name)}</div>
-      <div class="task-meta">
-        <span class="cat-tag" style="background:${col.bg};color:${col.fg};">${escHtml(cat.name)}</span>
+  const isExpanded = expandedTaskId === t.id;
+  const isTiming = t.timerStartedAt != null;
+  const tracked = effTrackedSec(t);
+
+  const timePillHTML = (tracked > 0 || isTiming)
+    ? `<span class="time-pill ${isTiming ? 'live' : ''}" data-task-timer-pill="${t.id}">⏱ ${formatDuration(tracked)}</span>`
+    : '';
+  const descIconHTML = t.desc && t.desc.trim() ? `<span class="desc-icon">📝</span>` : '';
+
+  return `<div class="task-card${t.done ? ' done' : ''}${isExpanded ? ' expanded' : ''}${isTiming ? ' timing' : ''}">
+    <div class="task-main" onclick="toggleExpand(event, ${t.id})">
+      <button class="check-btn${t.done ? ' done' : ''}" onclick="event.stopPropagation();toggleTask(${t.id})" aria-label="${t.done ? 'Uncheck' : 'Check'}">${t.done ? '✓' : ''}</button>
+      <div class="task-body">
+        <div class="task-name">${escHtml(t.name)}</div>
+        <div class="task-meta">
+          <span class="cat-tag" style="background:${col.bg};color:${col.fg};">${escHtml(cat.name)}</span>
+          ${timePillHTML}
+          ${descIconHTML}
+        </div>
       </div>
+      <span class="xp-badge ${cls}">+${t.xp} XP</span>
+      <span class="expand-arrow">▶</span>
+      <button class="del-btn" onclick="event.stopPropagation();deleteTask(${t.id})" aria-label="Delete">✕</button>
     </div>
-    <span class="xp-badge ${cls}">+${t.xp} XP</span>
-    <button class="del-btn" onclick="deleteTask(${t.id})" aria-label="Delete">✕</button>
+    ${isExpanded ? detailHTML(t) : ''}
+  </div>`;
+}
+
+function detailHTML(t) {
+  const isTiming = t.timerStartedAt != null;
+  const tracked = effTrackedSec(t);
+  const isDone = t.done;
+  return `<div class="task-detail">
+    <textarea class="desc-area" placeholder="Add notes, links, sub-tasks, context..." onchange="updateDesc(${t.id}, this.value)" onclick="event.stopPropagation()">${escHtml(t.desc || '')}</textarea>
+    ${!isDone ? `
+    <div class="timer-mini" onclick="event.stopPropagation()">
+      <div>
+        <div class="timer-mini-label">${isTiming ? 'Tracking time...' : 'Time on this task'}</div>
+        <div class="timer-mini-display" data-task-timer-display="${t.id}">${formatDuration(tracked)}</div>
+      </div>
+      <div class="timer-mini-controls">
+        ${isTiming
+          ? `<button class="timer-btn pause" onclick="pauseTimer(${t.id})">⏸ Pause</button>`
+          : `<button class="timer-btn start" onclick="startTimer(${t.id})">▶ Start</button>`
+        }
+        <button class="timer-btn complete" onclick="completeTaskFromTimer(${t.id})">✓ Complete</button>
+      </div>
+    </div>` : `
+    <div class="timer-mini" onclick="event.stopPropagation()">
+      <div>
+        <div class="timer-mini-label">Total time logged</div>
+        <div class="timer-mini-display">${formatDuration(tracked)}</div>
+      </div>
+    </div>`}
   </div>`;
 }
 
 function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function toggleExpand(event, id) {
+  // don't toggle if clicking inside the textarea or controls
+  if (event.target.closest('.task-detail')) return;
+  expandedTaskId = expandedTaskId === id ? null : id;
+  render();
+}
+
+function updateDesc(id, value) {
+  const t = state.tasks.find(t => t.id === id);
+  if (!t) return;
+  t.desc = value;
+  saveState();
+  // light render: just update the icon presence
+  const card = document.querySelector(`[data-task-card="${id}"]`);
+  // simpler: rerender after blur, but to keep keystrokes smooth we already use onchange (fires on blur). On blur, full render is fine.
+  render();
+}
 
 function setFilter(id) { activeFilter = id; render(); }
 
@@ -459,7 +664,7 @@ function addTask() {
   if (!name) return;
   const xp = parseInt(document.getElementById('xpPick').value, 10);
   const category = document.getElementById('catPick').value;
-  state.tasks.unshift({ id: Date.now(), name, xp, done: false, category });
+  state.tasks.unshift({ id: Date.now(), name, desc: '', xp, done: false, category, trackedSec: 0, timerStartedAt: null, xpFromTime: 0 });
   inp.value = '';
   saveState(); render();
 }
@@ -467,6 +672,8 @@ function addTask() {
 function toggleTask(id) {
   const t = state.tasks.find(t => t.id === id);
   if (!t) return;
+  // if currently timing, finalize the time first
+  if (t.timerStartedAt) pauseTimer(id, false);
   const prevLvl = getLevel(state.totalXP);
   t.done = !t.done;
   if (t.done) { state.totalXP += t.xp; state.doneCount++; }
@@ -479,8 +686,16 @@ function toggleTask(id) {
   saveState(); render();
 }
 
+function completeTaskFromTimer(id) {
+  const t = state.tasks.find(t => t.id === id);
+  if (!t || t.done) return;
+  if (t.timerStartedAt) pauseTimer(id, false);
+  toggleTask(id);
+}
+
 function deleteTask(id) {
   state.tasks = state.tasks.filter(t => t.id !== id);
+  if (expandedTaskId === id) expandedTaskId = null;
   saveState(); render();
 }
 
@@ -574,38 +789,38 @@ function deleteCategory(id) {
   saveState(); renderCatEditList(); render();
 }
 
-/* Timer */
-function openTimer() { document.getElementById('timerSection').style.display = 'block'; resetTimer(); }
-function closeTimer() {
-  clearInterval(timerInterval); timerRunning = false;
+/* Pomodoro */
+function openPomodoro() { document.getElementById('timerSection').style.display = 'block'; resetPomodoro(); }
+function closePomodoro() {
+  clearInterval(pomoInterval); pomoRunning = false;
   document.getElementById('timerSection').style.display = 'none';
   document.getElementById('timerToggle').textContent = 'Start';
 }
-function resetTimer() {
-  clearInterval(timerInterval); timerRunning = false;
-  timerSeconds = 25 * 60;
+function resetPomodoro() {
+  clearInterval(pomoInterval); pomoRunning = false;
+  pomoSeconds = 25 * 60;
   document.getElementById('timerDisplay').textContent = '25:00';
   document.getElementById('timerLabel').textContent = 'Focus session';
   document.getElementById('timerToggle').textContent = 'Start';
 }
-function toggleTimer() {
-  if (timerRunning) {
-    clearInterval(timerInterval); timerRunning = false;
+function togglePomodoro() {
+  if (pomoRunning) {
+    clearInterval(pomoInterval); pomoRunning = false;
     document.getElementById('timerToggle').textContent = 'Resume';
   } else {
-    timerRunning = true;
+    pomoRunning = true;
     document.getElementById('timerToggle').textContent = 'Pause';
     document.getElementById('timerLabel').textContent = 'Focus session — stay locked in!';
-    timerInterval = setInterval(() => {
-      timerSeconds--;
-      const m = Math.floor(timerSeconds / 60), s = timerSeconds % 60;
+    pomoInterval = setInterval(() => {
+      pomoSeconds--;
+      const m = Math.floor(pomoSeconds / 60), s = pomoSeconds % 60;
       document.getElementById('timerDisplay').textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
-      if (timerSeconds <= 0) {
-        clearInterval(timerInterval); timerRunning = false;
+      if (pomoSeconds <= 0) {
+        clearInterval(pomoInterval); pomoRunning = false;
         document.getElementById('timerToggle').textContent = 'Start';
         state.focusSessions = (state.focusSessions || 0) + 1;
         state.totalXP += 15;
-        showToast('🎯 Session complete! +15 bonus XP');
+        showToast('🎯 Pomodoro complete! +15 bonus XP');
         checkAchievements();
         saveState(); render();
       }
@@ -616,13 +831,27 @@ function toggleTimer() {
 function resetAll() {
   if (!confirm('This will erase all your tasks, XP, achievements, and categories. Continue?')) return;
   localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem(LEGACY_KEY);
+  LEGACY_KEYS.forEach(k => localStorage.removeItem(k));
   state = defaultState();
   activeFilter = 'all';
+  expandedTaskId = null;
   render();
 }
 
+// Pause any running timer when user closes tab
+window.addEventListener('beforeunload', () => {
+  const t = getCurrentTimerTask();
+  if (t) {
+    const elapsed = Math.floor((Date.now() - t.timerStartedAt) / 1000);
+    t.trackedSec = (t.trackedSec || 0) + elapsed;
+    t.timerStartedAt = null;
+    awardTimeXP(t);
+    saveState();
+  }
+});
+
 render();
+startLiveTimerLoop();
 </script>
 </body>
 </html>
