@@ -37,7 +37,6 @@
     --radius-lg: 12px;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   }
-
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #1c1c1a;
@@ -68,7 +67,6 @@
       --gray: #b4b2a9;
     }
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -92,11 +90,6 @@
   .xp-fill { height: 100%; border-radius: 5px; background: var(--accent); transition: width 0.5s ease; }
   .streak { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 8px; }
   .streak b { color: var(--danger); }
-
-  .timer-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--accent-bg); border: 0.5px solid var(--accent-border); border-radius: var(--radius-lg); padding: 12px 18px; margin-bottom: 1rem; flex-wrap: wrap; }
-  .timer-display { font-size: 28px; font-weight: 500; color: var(--accent-strong); font-variant-numeric: tabular-nums; line-height: 1; }
-  .timer-label { font-size: 12px; color: var(--accent); margin-bottom: 4px; }
-  .timer-controls { display: flex; gap: 8px; }
 
   .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
   .tab { padding: 6px 14px; border-radius: 20px; font-size: 13px; border: 0.5px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; font-family: inherit; }
@@ -169,7 +162,6 @@
   .timer-btn.complete { background: var(--success-bg); color: var(--success); border-color: var(--success); }
 
   .empty { font-size: 13px; color: var(--text-subtle); text-align: center; padding: 2rem 0; }
-
   .focus-btn { width: 100%; padding: 11px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--surface); color: var(--text-muted); font-size: 13px; cursor: pointer; margin-top: 8px; font-family: inherit; }
   .focus-btn:hover { background: var(--surface-2); color: var(--text); }
 
@@ -183,6 +175,7 @@
   .ach .ach-desc { color: var(--text-muted); font-size: 11px; }
   .ach.locked { opacity: 0.55; }
 
+  /* Modals (categories) */
   .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
   .modal-bg.show { display: flex; }
   .modal { background: var(--surface); border-radius: var(--radius-lg); border: 0.5px solid var(--border); padding: 1.5rem; max-width: 460px; width: 100%; max-height: 90vh; overflow-y: auto; }
@@ -203,6 +196,95 @@
   .footer button { background: none; border: none; color: var(--text-subtle); cursor: pointer; text-decoration: underline; font-family: inherit; font-size: 11px; }
   .footer button:hover { color: var(--danger); }
   .section-label { font-size: 11px; font-weight: 500; color: var(--text-subtle); letter-spacing: 0.08em; text-transform: uppercase; margin: 1rem 0 8px; }
+
+  /* ============================
+     FULLSCREEN POMODORO OVERLAY
+     ============================ */
+  .pomo-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: var(--bg);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem 1.5rem;
+    overflow-y: auto;
+  }
+  .pomo-overlay.show { display: flex; }
+  .pomo-overlay.phase-break { background: var(--teal-bg); }
+  .pomo-overlay.phase-break .pomo-digit-col, .pomo-overlay.phase-break .pomo-colon { color: var(--teal); }
+  .pomo-overlay.last-10 { animation: pomo-pulse 1s ease-in-out infinite; }
+  @keyframes pomo-pulse {
+    0%, 100% { background: var(--bg); }
+    50% { background: var(--danger-bg); }
+  }
+
+  .pomo-header { width: 100%; max-width: 700px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .pomo-phase-label { font-size: 13px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; }
+  .pomo-phase-label.break { color: var(--teal); }
+  .pomo-controls-top { display: flex; gap: 8px; align-items: center; }
+  .pomo-icon-btn { background: transparent; border: 0.5px solid var(--border-strong); border-radius: 50%; width: 38px; height: 38px; cursor: pointer; color: var(--text-muted); font-size: 16px; display: flex; align-items: center; justify-content: center; font-family: inherit; }
+  .pomo-icon-btn:hover { background: var(--surface-2); color: var(--text); }
+  .pomo-icon-btn.muted { background: var(--danger-bg); color: var(--danger); border-color: var(--danger); }
+
+  .pomo-center { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; width: 100%; gap: 1.5rem; }
+
+  .pomo-clock {
+    display: flex; align-items: center; justify-content: center;
+    font-family: ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Mono", Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-strong);
+    line-height: 1;
+    user-select: none;
+  }
+  .pomo-digit-col { font-size: clamp(80px, 22vw, 220px); font-weight: 600; height: 1em; width: 0.62em; overflow: hidden; position: relative; display: inline-block; }
+  .pomo-digit-stack { position: absolute; inset: 0; transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
+  .pomo-digit-cell { height: 1em; display: flex; align-items: center; justify-content: center; }
+  .pomo-colon { font-size: clamp(80px, 22vw, 220px); font-weight: 600; padding: 0 0.05em; position: relative; top: -0.06em; }
+
+  .pomo-time-edit { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; justify-content: center; font-size: 13px; color: var(--text-muted); }
+  .pomo-time-edit-row { display: flex; align-items: center; gap: 6px; }
+  .pomo-time-edit-row input { width: 56px; padding: 5px 8px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: 14px; text-align: center; font-family: ui-monospace, monospace; outline: none; }
+  .pomo-time-edit-row input:focus { border-color: var(--accent); }
+  .pomo-time-edit-row input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .pomo-task-card {
+    width: 100%; max-width: 540px;
+    background: var(--surface); border: 0.5px solid var(--border-strong); border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    display: flex; flex-direction: column; gap: 8px;
+    box-shadow: var(--shadow);
+  }
+  .pomo-task-card.empty { color: var(--text-subtle); text-align: center; padding: 24px; font-size: 14px; }
+  .pomo-task-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .pomo-task-name { font-size: 17px; font-weight: 500; color: var(--text); flex: 1; min-width: 0; word-break: break-word; }
+  .pomo-task-meta { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pomo-task-desc { font-size: 13px; color: var(--text-muted); white-space: pre-wrap; max-height: 120px; overflow-y: auto; line-height: 1.55; }
+  .pomo-task-time { font-size: 12px; color: var(--text-subtle); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .pomo-task-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+
+  .pomo-controls { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; align-items: center; }
+  .pomo-btn-big {
+    padding: 14px 32px; border-radius: 30px; border: none; font-size: 16px; font-weight: 500; cursor: pointer;
+    background: var(--accent); color: white; min-width: 140px; font-family: inherit;
+    transition: transform 0.1s, background 0.15s;
+  }
+  .pomo-btn-big:hover { background: var(--accent-strong); }
+  .pomo-btn-big:active { transform: scale(0.97); }
+  .pomo-btn-big.secondary { background: transparent; color: var(--accent-strong); border: 0.5px solid var(--accent-border); }
+  .pomo-btn-big.secondary:hover { background: var(--accent-bg); }
+  .pomo-btn-big.danger { background: transparent; color: var(--danger); border: 0.5px solid var(--danger); }
+  .pomo-btn-big.danger:hover { background: var(--danger-bg); }
+
+  .pomo-next-list { width: 100%; max-width: 540px; display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .pomo-next-item { background: var(--surface-2); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 10px 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-family: inherit; text-align: left; color: inherit; }
+  .pomo-next-item:hover { background: var(--accent-bg); border-color: var(--accent-border); }
+  .pomo-next-item-name { flex: 1; font-size: 14px; }
+
+  @media (max-width: 600px) {
+    .pomo-task-card { padding: 14px 16px; }
+    .pomo-btn-big { padding: 12px 24px; min-width: 110px; font-size: 15px; }
+  }
 </style>
 </head>
 <body>
@@ -220,20 +302,6 @@
       <div class="xp-label"><span>Level <span id="lvlA">1</span></span><span id="xpProg">0 / 100 XP</span></div>
       <div class="xp-track"><div class="xp-fill" id="xpBar" style="width:0%"></div></div>
       <div class="streak" id="streakMsg">Complete quests to earn XP and level up!</div>
-    </div>
-
-    <div id="timerSection" style="display:none">
-      <div class="timer-row">
-        <div>
-          <div class="timer-label" id="timerLabel">Focus session</div>
-          <div class="timer-display" id="timerDisplay">25:00</div>
-        </div>
-        <div class="timer-controls">
-          <button class="btn-ghost" id="timerToggle" onclick="togglePomodoro()">Start</button>
-          <button class="btn-ghost" onclick="resetPomodoro()">Reset</button>
-          <button class="btn-ghost" onclick="closePomodoro()">✕</button>
-        </div>
-      </div>
     </div>
 
     <div class="tabs">
@@ -256,7 +324,7 @@
         <button class="btn-primary" onclick="addTask()">+ Add</button>
       </div>
       <div class="task-list" id="activeList"></div>
-      <button class="focus-btn" onclick="openPomodoro()">⏱ Start 25-min Pomodoro</button>
+      <button class="focus-btn" onclick="openPomodoro()">⏱ Start focus session</button>
     </div>
 
     <div id="panelDone" style="display:none">
@@ -274,6 +342,7 @@
     </div>
   </div>
 
+  <!-- Categories modal -->
   <div class="modal-bg" id="catModal" onclick="if(event.target.id==='catModal')closeCatModal()">
     <div class="modal">
       <button class="modal-close" onclick="closeCatModal()">✕</button>
@@ -287,13 +356,47 @@
     </div>
   </div>
 
+  <!-- ============================
+       FULLSCREEN POMODORO OVERLAY
+       ============================ -->
+  <div class="pomo-overlay" id="pomoOverlay">
+    <div class="pomo-header">
+      <div class="pomo-phase-label" id="pomoPhaseLabel">Focus</div>
+      <div class="pomo-controls-top">
+        <button class="pomo-icon-btn" id="pomoSoundBtn" onclick="toggleSound()" title="Toggle sound">🔊</button>
+        <button class="pomo-icon-btn" onclick="closePomodoro()" title="Close">✕</button>
+      </div>
+    </div>
+
+    <div class="pomo-center">
+      <div class="pomo-clock" id="pomoClock"></div>
+      <div class="pomo-time-edit" id="pomoTimeEdit">
+        <div class="pomo-time-edit-row">
+          <span>Focus:</span>
+          <input type="number" id="pomoFocusMins" min="1" max="120" value="25" onchange="updatePhaseDuration('focus')" />
+          <span>min</span>
+        </div>
+        <div class="pomo-time-edit-row">
+          <span>Break:</span>
+          <input type="number" id="pomoBreakMins" min="1" max="60" value="5" onchange="updatePhaseDuration('break')" />
+          <span>min</span>
+        </div>
+      </div>
+      <div class="pomo-task-card" id="pomoTaskCard"></div>
+      <div class="pomo-controls" id="pomoControls"></div>
+      <div class="pomo-next-list" id="pomoNextList" style="display:none"></div>
+    </div>
+
+    <div></div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'task-quest-v3';
-const LEGACY_KEYS = ['task-quest-v2', 'task-quest-v1'];
+const STORAGE_KEY = 'task-quest-v4';
+const LEGACY_KEYS = ['task-quest-v3', 'task-quest-v2', 'task-quest-v1'];
 const XP_LEVELS = [0, 100, 250, 500, 1000, 2000, 3500, 5500, 8000, 12000, 20000, 30000];
-const TIME_XP_INTERVAL_SEC = 300; // award 1 XP per 5 minutes tracked
+const TIME_XP_INTERVAL_SEC = 300;
 
 const COLOR_PALETTE = [
   { id: 'purple', bg: 'var(--accent-bg)',  fg: 'var(--accent-strong)', dot: '#7f77dd' },
@@ -305,7 +408,6 @@ const COLOR_PALETTE = [
   { id: 'pink',   bg: 'var(--pink-bg)',    fg: 'var(--pink)',          dot: '#d4537e' },
   { id: 'gray',   bg: 'var(--gray-bg)',    fg: 'var(--gray)',          dot: '#888780' },
 ];
-
 const DEFAULT_CATEGORIES = [
   { id: 'general',  name: 'General',  color: 'gray' },
   { id: 'work',     name: 'Work',     color: 'info' },
@@ -313,7 +415,6 @@ const DEFAULT_CATEGORIES = [
   { id: 'health',   name: 'Health',   color: 'green' },
   { id: 'learning', name: 'Learning', color: 'amber' },
 ];
-
 const ACHIEVEMENTS = [
   { id: 'first', icon: '⚔', label: 'First blood', desc: 'Complete 1 task', check: s => s.doneCount >= 1 },
   { id: 'five', icon: '🏆', label: 'On a roll', desc: 'Complete 5 tasks', check: s => s.doneCount >= 5 },
@@ -349,25 +450,18 @@ function defaultState() {
     doneCount: 0,
     focusSessions: 0,
     unlockedAchs: [],
+    settings: { focusMins: 25, breakMins: 5, soundOn: true },
   };
 }
 
 function migrateTask(t) {
-  return {
-    desc: '',
-    trackedSec: 0,
-    timerStartedAt: null,
-    xpFromTime: 0,
-    category: 'general',
-    ...t,
-  };
+  return { desc: '', trackedSec: 0, timerStartedAt: null, xpFromTime: 0, category: 'general', ...t };
 }
 
 function loadState() {
   try {
     let raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      // try migrating from any older version
       for (const key of LEGACY_KEYS) {
         const legacy = localStorage.getItem(key);
         if (legacy) {
@@ -377,6 +471,7 @@ function loadState() {
             ...old,
             categories: old.categories && old.categories.length ? old.categories : DEFAULT_CATEGORIES.slice(),
             tasks: (old.tasks || []).map(migrateTask),
+            settings: { focusMins: 25, breakMins: 5, soundOn: true, ...(old.settings || {}) },
           };
           localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
           return migrated;
@@ -389,47 +484,34 @@ function loadState() {
     merged.unlockedAchs = parsed.unlockedAchs || [];
     merged.categories = parsed.categories && parsed.categories.length ? parsed.categories : DEFAULT_CATEGORIES.slice();
     merged.tasks = (parsed.tasks || []).map(migrateTask);
+    merged.settings = { focusMins: 25, breakMins: 5, soundOn: true, ...(parsed.settings || {}) };
     return merged;
   } catch (e) {
     return defaultState();
   }
 }
-
-function saveState() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
-}
+function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {} }
 
 function getLevel(xp) {
   for (let i = XP_LEVELS.length - 1; i >= 0; i--) if (xp >= XP_LEVELS[i]) return i + 1;
   return 1;
 }
-
 function getLevelXP() {
   const lvl = getLevel(state.totalXP) - 1;
   const current = XP_LEVELS[lvl] || 0;
   const next = XP_LEVELS[lvl + 1] || (XP_LEVELS[lvl] + 500);
   return { current, next, pct: Math.round(((state.totalXP - current) / (next - current)) * 100) };
 }
-
 function getColor(id) { return COLOR_PALETTE.find(c => c.id === id) || COLOR_PALETTE[7]; }
 function getCategory(id) { return state.categories.find(c => c.id === id) || state.categories[0]; }
 
-/* ----- Time tracking ----- */
-function getCurrentTimerTask() {
-  return state.tasks.find(t => t.timerStartedAt != null);
-}
-
-// effective tracked seconds, including any currently-running timer
+/* ----- Time tracking on tasks ----- */
+function getCurrentTimerTask() { return state.tasks.find(t => t.timerStartedAt != null); }
 function effTrackedSec(t) {
   if (!t.timerStartedAt) return t.trackedSec || 0;
-  const elapsed = Math.floor((Date.now() - t.timerStartedAt) / 1000);
-  return (t.trackedSec || 0) + elapsed;
+  return (t.trackedSec || 0) + Math.floor((Date.now() - t.timerStartedAt) / 1000);
 }
-
-function totalTrackedSec(s) {
-  return s.tasks.reduce((acc, t) => acc + effTrackedSec(t), 0);
-}
-
+function totalTrackedSec(s) { return s.tasks.reduce((acc, t) => acc + effTrackedSec(t), 0); }
 function formatDuration(sec) {
   if (sec < 60) return sec + 's';
   const m = Math.floor(sec / 60), s = sec % 60;
@@ -437,32 +519,24 @@ function formatDuration(sec) {
   const h = Math.floor(m / 60), mm = m % 60;
   return mm > 0 ? `${h}h ${mm}m` : `${h}h`;
 }
-
-function startTimer(taskId) {
+function startTaskTimer(taskId) {
   const t = state.tasks.find(t => t.id === taskId);
   if (!t || t.done) return;
-  // pause any currently running timer
   const running = getCurrentTimerTask();
-  if (running && running.id !== taskId) {
-    pauseTimer(running.id, false); // don't toast
-  }
+  if (running && running.id !== taskId) pauseTaskTimer(running.id, false);
   t.timerStartedAt = Date.now();
   saveState(); render();
-  showToast(`⏱ Timer started for "${truncate(t.name)}"`);
 }
-
-function pauseTimer(taskId, notify = true) {
+function pauseTaskTimer(taskId, notify = true) {
   const t = state.tasks.find(t => t.id === taskId);
   if (!t || !t.timerStartedAt) return;
   const elapsed = Math.floor((Date.now() - t.timerStartedAt) / 1000);
   t.trackedSec = (t.trackedSec || 0) + elapsed;
   t.timerStartedAt = null;
-  // award XP for new time milestones
   awardTimeXP(t);
   saveState(); render();
   if (notify) showToast(`⏸ Paused — total: ${formatDuration(t.trackedSec)}`);
 }
-
 function awardTimeXP(t) {
   const earned = Math.floor((t.trackedSec || 0) / TIME_XP_INTERVAL_SEC);
   const previously = t.xpFromTime || 0;
@@ -475,45 +549,411 @@ function awardTimeXP(t) {
   }
 }
 
-function truncate(s, n = 30) { return s.length > n ? s.slice(0, n) + '...' : s; }
+/* live timer loop for the in-list per-task display */
+let liveTimerInterval = setInterval(() => {
+  const t = getCurrentTimerTask();
+  if (!t) return;
+  const display = document.querySelector(`[data-task-timer-display="${t.id}"]`);
+  const pill = document.querySelector(`[data-task-timer-pill="${t.id}"]`);
+  if (display) display.textContent = formatDuration(effTrackedSec(t));
+  if (pill) pill.textContent = '⏱ ' + formatDuration(effTrackedSec(t));
+  // award XP per tick
+  const currentSec = effTrackedSec(t);
+  const earnedTotal = Math.floor(currentSec / TIME_XP_INTERVAL_SEC);
+  if (earnedTotal > (t.xpFromTime || 0)) {
+    const delta = earnedTotal - (t.xpFromTime || 0);
+    t.xpFromTime = earnedTotal;
+    state.totalXP += delta;
+    showToast(`+${delta} bonus XP for time logged`);
+    checkAchievements();
+    saveState();
+    document.getElementById('totalXP').textContent = state.totalXP;
+    document.getElementById('level').textContent = getLevel(state.totalXP);
+    document.getElementById('lvlA').textContent = getLevel(state.totalXP);
+    const lx = getLevelXP();
+    document.getElementById('xpProg').textContent = `${state.totalXP - lx.current} / ${lx.next - lx.current} XP`;
+    document.getElementById('xpBar').style.width = lx.pct + '%';
+  }
+}, 1000);
 
-let liveTimerInterval = null;
-function startLiveTimerLoop() {
-  if (liveTimerInterval) clearInterval(liveTimerInterval);
-  liveTimerInterval = setInterval(() => {
-    const t = getCurrentTimerTask();
-    if (!t) return;
-    // update displayed time on the running task only
-    const display = document.querySelector(`[data-task-timer-display="${t.id}"]`);
-    const pill = document.querySelector(`[data-task-timer-pill="${t.id}"]`);
-    if (display) display.textContent = formatDuration(effTrackedSec(t));
-    if (pill) pill.textContent = '⏱ ' + formatDuration(effTrackedSec(t));
-    // check for newly earned XP every tick
-    const t2 = state.tasks.find(x => x.id === t.id);
-    const currentSec = effTrackedSec(t2);
-    const earnedTotal = Math.floor(currentSec / TIME_XP_INTERVAL_SEC);
-    if (earnedTotal > (t2.xpFromTime || 0)) {
-      const delta = earnedTotal - (t2.xpFromTime || 0);
-      t2.xpFromTime = earnedTotal;
-      state.totalXP += delta;
-      showToast(`+${delta} bonus XP for time logged`);
-      checkAchievements();
-      saveState();
-      // refresh stats display only (avoid full re-render disrupting typing)
-      document.getElementById('totalXP').textContent = state.totalXP;
-      document.getElementById('level').textContent = getLevel(state.totalXP);
-      document.getElementById('lvlA').textContent = getLevel(state.totalXP);
-      const lx = getLevelXP();
-      document.getElementById('xpProg').textContent = `${state.totalXP - lx.current} / ${lx.next - lx.current} XP`;
-      document.getElementById('xpBar').style.width = lx.pct + '%';
-    }
-  }, 1000);
+/* ============================
+   POMODORO STATE & RENDERING
+   ============================ */
+const pomo = {
+  isOpen: false,
+  phase: 'focus',          // 'focus' | 'break'
+  remaining: 25 * 60,      // seconds
+  running: false,
+  endsAt: null,            // timestamp (ms) when current run ends
+  taskId: null,            // which task is the focus session about
+  lastSecondShown: null,
+  audioCtx: null,
+  finished: false,         // shows the completion screen
+};
+
+function getDurationFor(phase) {
+  return (phase === 'focus' ? state.settings.focusMins : state.settings.breakMins) * 60;
 }
 
-let pomoInterval = null;
-let pomoSeconds = 25 * 60;
-let pomoRunning = false;
+function openPomodoro() {
+  pomo.isOpen = true;
+  pomo.phase = 'focus';
+  pomo.remaining = getDurationFor('focus');
+  pomo.running = false;
+  pomo.endsAt = null;
+  pomo.finished = false;
+  // pick a default task: currently-timing task, else first active task
+  const timingTask = getCurrentTimerTask();
+  const firstActive = state.tasks.find(t => !t.done);
+  pomo.taskId = (timingTask || firstActive || {}).id || null;
+  document.getElementById('pomoOverlay').classList.add('show');
+  renderPomodoro();
+}
 
+function closePomodoro() {
+  // if running, finalize: pause task timer
+  if (pomo.running) {
+    pomo.running = false;
+    if (pomo.taskId) pauseTaskTimer(pomo.taskId, false);
+  }
+  pomo.isOpen = false;
+  document.getElementById('pomoOverlay').classList.remove('show');
+  document.getElementById('pomoOverlay').classList.remove('phase-break', 'last-10');
+  render();
+}
+
+function startPomodoro() {
+  if (pomo.finished) return;
+  // sync remaining if it changed from settings while paused
+  pomo.endsAt = Date.now() + pomo.remaining * 1000;
+  pomo.running = true;
+  // auto-start the linked task's timer (only on focus phase)
+  if (pomo.phase === 'focus' && pomo.taskId) {
+    startTaskTimer(pomo.taskId);
+  }
+  ensureAudio();
+  renderPomodoro();
+}
+
+function pausePomodoro() {
+  if (!pomo.running) return;
+  pomo.remaining = Math.max(0, Math.ceil((pomo.endsAt - Date.now()) / 1000));
+  pomo.running = false;
+  pomo.endsAt = null;
+  // pause task timer too
+  if (pomo.phase === 'focus' && pomo.taskId) {
+    pauseTaskTimer(pomo.taskId, false);
+  }
+  renderPomodoro();
+}
+
+function resetPomodoroPhase() {
+  pomo.running = false;
+  pomo.endsAt = null;
+  pomo.remaining = getDurationFor(pomo.phase);
+  pomo.finished = false;
+  if (pomo.phase === 'focus' && pomo.taskId && getCurrentTimerTask() && getCurrentTimerTask().id === pomo.taskId) {
+    pauseTaskTimer(pomo.taskId, false);
+  }
+  renderPomodoro();
+}
+
+function updatePhaseDuration(phase) {
+  const inputId = phase === 'focus' ? 'pomoFocusMins' : 'pomoBreakMins';
+  const v = parseInt(document.getElementById(inputId).value, 10);
+  if (isNaN(v) || v < 1) return;
+  const clamped = Math.min(phase === 'focus' ? 120 : 60, Math.max(1, v));
+  document.getElementById(inputId).value = clamped;
+  if (phase === 'focus') state.settings.focusMins = clamped;
+  else state.settings.breakMins = clamped;
+  // if currently on this phase and not running, reflect immediately
+  if (pomo.phase === phase && !pomo.running && !pomo.finished) {
+    pomo.remaining = clamped * 60;
+    renderPomodoro();
+  }
+  saveState();
+}
+
+function selectPomodoroTask(taskId) {
+  // pause any running task timer if switching tasks
+  const running = getCurrentTimerTask();
+  if (running) pauseTaskTimer(running.id, false);
+  pomo.taskId = taskId;
+  pomo.finished = false;
+  // if pomodoro is currently running, link the new task
+  if (pomo.running && pomo.phase === 'focus') startTaskTimer(taskId);
+  document.getElementById('pomoNextList').style.display = 'none';
+  renderPomodoro();
+}
+
+function completeCurrentPomodoroTask() {
+  if (!pomo.taskId) return;
+  const t = state.tasks.find(t => t.id === pomo.taskId);
+  if (!t || t.done) return;
+  // finalize task time, award XP, mark done
+  if (t.timerStartedAt) pauseTaskTimer(t.id, false);
+  const prevLvl = getLevel(state.totalXP);
+  t.done = true;
+  state.totalXP += t.xp;
+  state.doneCount++;
+  const newLvl = getLevel(state.totalXP);
+  showToast(`+${t.xp} XP earned!${newLvl > prevLvl ? ' 🎉 Level up! Now level ' + newLvl : ''}`);
+  checkAchievements();
+  saveState();
+  // show next-task picker
+  showNextTaskList();
+}
+
+function showNextTaskList() {
+  const list = document.getElementById('pomoNextList');
+  const candidates = state.tasks.filter(t => !t.done && t.id !== pomo.taskId).slice(0, 5);
+  if (candidates.length === 0) {
+    list.innerHTML = '<div style="text-align:center;font-size:13px;color:var(--text-muted);padding:1rem;">No other active tasks. Add one or close the timer.</div>';
+  } else {
+    list.innerHTML = `<div style="text-align:center;font-size:11px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:0.08em;padding:6px 0;">Pick the next quest</div>` +
+      candidates.map(t => {
+        const cat = getCategory(t.category);
+        const col = getColor(cat.color);
+        return `<button class="pomo-next-item" onclick="selectPomodoroTask(${t.id})">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${col.dot};"></span>
+          <span class="pomo-next-item-name">${escHtml(t.name)}</span>
+          <span class="xp-badge ${t.xp===10?'xp-sm':t.xp===25?'xp-md':t.xp===50?'xp-lg':'xp-xl'}">+${t.xp} XP</span>
+        </button>`;
+      }).join('');
+  }
+  list.style.display = 'flex';
+  pomo.taskId = null;
+  renderPomodoro();
+}
+
+/* Phase transitions */
+function onPhaseEnd() {
+  pomo.running = false;
+  pomo.endsAt = null;
+  playEndBell();
+  // pause task timer if it was running
+  if (pomo.phase === 'focus' && pomo.taskId) pauseTaskTimer(pomo.taskId, false);
+
+  if (pomo.phase === 'focus') {
+    state.focusSessions = (state.focusSessions || 0) + 1;
+    state.totalXP += 15;
+    showToast('🎯 Focus done! +15 XP. Time for a break.');
+    checkAchievements();
+    saveState();
+    // transition to break — auto start
+    pomo.phase = 'break';
+    pomo.remaining = getDurationFor('break');
+    pomo.endsAt = Date.now() + pomo.remaining * 1000;
+    pomo.running = true;
+  } else {
+    showToast('☕ Break done! Ready for another round?');
+    pomo.phase = 'focus';
+    pomo.remaining = getDurationFor('focus');
+    // user must manually start the next focus session
+  }
+  renderPomodoro();
+}
+
+/* Render the full overlay */
+function renderPomodoro() {
+  if (!pomo.isOpen) return;
+  const overlay = document.getElementById('pomoOverlay');
+  overlay.classList.toggle('phase-break', pomo.phase === 'break');
+
+  // phase label
+  const phaseLabel = document.getElementById('pomoPhaseLabel');
+  phaseLabel.textContent = pomo.phase === 'focus' ? 'Focus' : 'Break';
+  phaseLabel.classList.toggle('break', pomo.phase === 'break');
+
+  // sound button
+  document.getElementById('pomoSoundBtn').textContent = state.settings.soundOn ? '🔊' : '🔇';
+  document.getElementById('pomoSoundBtn').classList.toggle('muted', !state.settings.soundOn);
+
+  // time inputs
+  document.getElementById('pomoFocusMins').value = state.settings.focusMins;
+  document.getElementById('pomoBreakMins').value = state.settings.breakMins;
+  document.getElementById('pomoFocusMins').disabled = pomo.running;
+  document.getElementById('pomoBreakMins').disabled = pomo.running;
+  document.getElementById('pomoTimeEdit').style.display = pomo.finished ? 'none' : '';
+
+  // clock
+  renderClock();
+
+  // task card
+  renderPomoTaskCard();
+
+  // controls
+  renderPomoControls();
+}
+
+function renderClock() {
+  const sec = Math.max(0, pomo.remaining);
+  const m = Math.floor(sec / 60), s = sec % 60;
+  const digits = [
+    Math.floor(m / 10), m % 10,
+    -1, // colon placeholder
+    Math.floor(s / 10), s % 10,
+  ];
+  const clockEl = document.getElementById('pomoClock');
+  // build columns once, animate via translate
+  if (!clockEl.dataset.built) {
+    let html = '';
+    for (let i = 0; i < digits.length; i++) {
+      if (digits[i] === -1) {
+        html += `<div class="pomo-colon">:</div>`;
+      } else {
+        html += `<div class="pomo-digit-col"><div class="pomo-digit-stack" data-stack="${i}">`;
+        for (let n = 0; n <= 9; n++) html += `<div class="pomo-digit-cell">${n}</div>`;
+        html += `</div></div>`;
+      }
+    }
+    clockEl.innerHTML = html;
+    clockEl.dataset.built = '1';
+  }
+  digits.forEach((d, i) => {
+    if (d < 0) return;
+    const stack = clockEl.querySelector(`[data-stack="${i}"]`);
+    if (stack) stack.style.transform = `translateY(-${d}em)`;
+  });
+
+  // last-10 visual pulse only on focus phase
+  document.getElementById('pomoOverlay').classList.toggle('last-10', pomo.phase === 'focus' && pomo.running && sec > 0 && sec <= 10);
+}
+
+function renderPomoTaskCard() {
+  const card = document.getElementById('pomoTaskCard');
+  if (pomo.taskId == null) {
+    card.classList.add('empty');
+    if (pomo.finished) {
+      card.innerHTML = `<div>Pick your next quest below ↓</div>`;
+    } else {
+      card.innerHTML = `<div>No task selected. ${state.tasks.filter(t => !t.done).length > 0 ? 'Choose one to focus on.' : 'Add a task first.'}</div>`;
+      // show selector
+      if (state.tasks.filter(t => !t.done).length > 0) showNextTaskListPicker();
+    }
+    return;
+  }
+  card.classList.remove('empty');
+  const t = state.tasks.find(t => t.id === pomo.taskId);
+  if (!t) { card.innerHTML = ''; return; }
+  const cat = getCategory(t.category);
+  const col = getColor(cat.color);
+  const xpCls = t.xp === 10 ? 'xp-sm' : t.xp === 25 ? 'xp-md' : t.xp === 50 ? 'xp-lg' : 'xp-xl';
+  const tracked = effTrackedSec(t);
+  card.innerHTML = `
+    <div class="pomo-task-header">
+      <span class="cat-tag" style="background:${col.bg};color:${col.fg};">${escHtml(cat.name)}</span>
+      <div class="pomo-task-name">${escHtml(t.name)}</div>
+      <span class="xp-badge ${xpCls}">+${t.xp} XP</span>
+    </div>
+    ${t.desc && t.desc.trim() ? `<div class="pomo-task-desc">${escHtml(t.desc)}</div>` : ''}
+    <div class="pomo-task-time">⏱ Total time on this task: <span data-task-timer-display="${t.id}">${formatDuration(tracked)}</span></div>
+    <div class="pomo-task-actions">
+      <button class="btn-ghost" onclick="showNextTaskListPicker()">Switch task</button>
+      <button class="btn-ghost" onclick="completeCurrentPomodoroTask()" style="border-color:var(--success);color:var(--success);">✓ Complete this task</button>
+    </div>
+  `;
+}
+
+function showNextTaskListPicker() {
+  const list = document.getElementById('pomoNextList');
+  const candidates = state.tasks.filter(t => !t.done && t.id !== pomo.taskId).slice(0, 8);
+  if (candidates.length === 0) {
+    list.style.display = 'none';
+    return;
+  }
+  list.innerHTML = `<div style="text-align:center;font-size:11px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:0.08em;padding:6px 0;">Pick a task to focus on</div>` +
+    candidates.map(t => {
+      const cat = getCategory(t.category);
+      const col = getColor(cat.color);
+      return `<button class="pomo-next-item" onclick="selectPomodoroTask(${t.id})">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${col.dot};"></span>
+        <span class="pomo-next-item-name">${escHtml(t.name)}</span>
+        <span class="xp-badge ${t.xp===10?'xp-sm':t.xp===25?'xp-md':t.xp===50?'xp-lg':'xp-xl'}">+${t.xp} XP</span>
+      </button>`;
+    }).join('');
+  list.style.display = 'flex';
+}
+
+function renderPomoControls() {
+  const ctrl = document.getElementById('pomoControls');
+  if (pomo.running) {
+    ctrl.innerHTML = `
+      <button class="pomo-btn-big secondary" onclick="pausePomodoro()">⏸ Pause</button>
+      <button class="pomo-btn-big danger" onclick="resetPomodoroPhase()">↺ Reset</button>
+    `;
+  } else {
+    const phaseName = pomo.phase === 'focus' ? 'focus' : 'break';
+    ctrl.innerHTML = `
+      <button class="pomo-btn-big" onclick="startPomodoro()">▶ Start ${phaseName}</button>
+      ${pomo.remaining < getDurationFor(pomo.phase) ? `<button class="pomo-btn-big danger" onclick="resetPomodoroPhase()">↺ Reset</button>` : ''}
+    `;
+  }
+}
+
+/* ============================
+   AUDIO
+   ============================ */
+function ensureAudio() {
+  if (pomo.audioCtx) return;
+  try { pomo.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+}
+function beep(freq, duration = 0.08, type = 'sine', vol = 0.15) {
+  if (!state.settings.soundOn || !pomo.audioCtx) return;
+  const ctx = pomo.audioCtx;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.value = 0;
+  gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.01);
+  gain.gain.linearRampToValueAtTime(0, ctx.currentTime + duration);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + duration);
+}
+function playTick(secLeft) {
+  if (secLeft > 10) {
+    beep(800, 0.025, 'square', 0.06); // soft tick
+  } else if (secLeft > 0) {
+    beep(1200, 0.07, 'square', 0.18); // urgent boop
+  }
+}
+function playEndBell() {
+  if (!state.settings.soundOn) return;
+  ensureAudio();
+  setTimeout(() => beep(880, 0.18, 'sine', 0.22), 0);
+  setTimeout(() => beep(1108, 0.22, 'sine', 0.22), 130);
+  setTimeout(() => beep(1318, 0.32, 'sine', 0.22), 280);
+}
+function toggleSound() {
+  state.settings.soundOn = !state.settings.soundOn;
+  saveState();
+  if (state.settings.soundOn) ensureAudio();
+  document.getElementById('pomoSoundBtn').textContent = state.settings.soundOn ? '🔊' : '🔇';
+  document.getElementById('pomoSoundBtn').classList.toggle('muted', !state.settings.soundOn);
+}
+
+/* ============================
+   POMODORO TICK LOOP
+   ============================ */
+setInterval(() => {
+  if (!pomo.isOpen || !pomo.running) return;
+  const secLeft = Math.max(0, Math.ceil((pomo.endsAt - Date.now()) / 1000));
+  if (secLeft !== pomo.remaining) {
+    pomo.remaining = secLeft;
+    renderClock();
+    if (pomo.lastSecondShown !== secLeft) {
+      pomo.lastSecondShown = secLeft;
+      if (secLeft > 0) playTick(secLeft);
+    }
+  }
+  if (secLeft <= 0) onPhaseEnd();
+}, 200);
+
+/* ============================
+   MAIN APP RENDER
+   ============================ */
 function render() {
   const lvl = getLevel(state.totalXP);
   document.getElementById('level').textContent = lvl;
@@ -532,6 +972,7 @@ function render() {
   renderCatFilters('catFiltersDone', true);
   renderTaskLists();
   renderAchievements();
+  if (pomo.isOpen) renderPomodoro();
 }
 
 function renderCatPicker() {
@@ -565,11 +1006,9 @@ function renderTaskLists() {
   const filterFn = t => activeFilter === 'all' || t.category === activeFilter;
   const active = state.tasks.filter(t => !t.done && filterFn(t));
   const done   = state.tasks.filter(t =>  t.done && filterFn(t));
-
   document.getElementById('activeList').innerHTML = active.length === 0
     ? '<div class="empty">No active quests in this view.</div>'
     : active.map(taskHTML).join('');
-
   document.getElementById('doneList').innerHTML = done.length === 0
     ? '<div class="empty">No completed quests in this view.</div>'
     : done.map(taskHTML).join('');
@@ -582,12 +1021,10 @@ function taskHTML(t) {
   const isExpanded = expandedTaskId === t.id;
   const isTiming = t.timerStartedAt != null;
   const tracked = effTrackedSec(t);
-
   const timePillHTML = (tracked > 0 || isTiming)
     ? `<span class="time-pill ${isTiming ? 'live' : ''}" data-task-timer-pill="${t.id}">⏱ ${formatDuration(tracked)}</span>`
     : '';
   const descIconHTML = t.desc && t.desc.trim() ? `<span class="desc-icon">📝</span>` : '';
-
   return `<div class="task-card${t.done ? ' done' : ''}${isExpanded ? ' expanded' : ''}${isTiming ? ' timing' : ''}">
     <div class="task-main" onclick="toggleExpand(event, ${t.id})">
       <button class="check-btn${t.done ? ' done' : ''}" onclick="event.stopPropagation();toggleTask(${t.id})" aria-label="${t.done ? 'Uncheck' : 'Check'}">${t.done ? '✓' : ''}</button>
@@ -621,8 +1058,8 @@ function detailHTML(t) {
       </div>
       <div class="timer-mini-controls">
         ${isTiming
-          ? `<button class="timer-btn pause" onclick="pauseTimer(${t.id})">⏸ Pause</button>`
-          : `<button class="timer-btn start" onclick="startTimer(${t.id})">▶ Start</button>`
+          ? `<button class="timer-btn pause" onclick="pauseTaskTimer(${t.id})">⏸ Pause</button>`
+          : `<button class="timer-btn start" onclick="startTaskTimer(${t.id})">▶ Start</button>`
         }
         <button class="timer-btn complete" onclick="completeTaskFromTimer(${t.id})">✓ Complete</button>
       </div>
@@ -639,23 +1076,16 @@ function detailHTML(t) {
 function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
 function toggleExpand(event, id) {
-  // don't toggle if clicking inside the textarea or controls
   if (event.target.closest('.task-detail')) return;
   expandedTaskId = expandedTaskId === id ? null : id;
   render();
 }
-
 function updateDesc(id, value) {
   const t = state.tasks.find(t => t.id === id);
   if (!t) return;
   t.desc = value;
-  saveState();
-  // light render: just update the icon presence
-  const card = document.querySelector(`[data-task-card="${id}"]`);
-  // simpler: rerender after blur, but to keep keystrokes smooth we already use onchange (fires on blur). On blur, full render is fine.
-  render();
+  saveState(); render();
 }
-
 function setFilter(id) { activeFilter = id; render(); }
 
 function addTask() {
@@ -668,37 +1098,31 @@ function addTask() {
   inp.value = '';
   saveState(); render();
 }
-
 function toggleTask(id) {
   const t = state.tasks.find(t => t.id === id);
   if (!t) return;
-  // if currently timing, finalize the time first
-  if (t.timerStartedAt) pauseTimer(id, false);
+  if (t.timerStartedAt) pauseTaskTimer(id, false);
   const prevLvl = getLevel(state.totalXP);
   t.done = !t.done;
   if (t.done) { state.totalXP += t.xp; state.doneCount++; }
   else { state.totalXP = Math.max(0, state.totalXP - t.xp); state.doneCount = Math.max(0, state.doneCount - 1); }
   const newLvl = getLevel(state.totalXP);
-  if (t.done) {
-    showToast(`+${t.xp} XP earned!${newLvl > prevLvl ? ' 🎉 Level up! Now level ' + newLvl : ''}`);
-  }
+  if (t.done) showToast(`+${t.xp} XP earned!${newLvl > prevLvl ? ' 🎉 Level up! Now level ' + newLvl : ''}`);
   checkAchievements();
   saveState(); render();
 }
-
 function completeTaskFromTimer(id) {
   const t = state.tasks.find(t => t.id === id);
   if (!t || t.done) return;
-  if (t.timerStartedAt) pauseTimer(id, false);
+  if (t.timerStartedAt) pauseTaskTimer(id, false);
   toggleTask(id);
 }
-
 function deleteTask(id) {
   state.tasks = state.tasks.filter(t => t.id !== id);
   if (expandedTaskId === id) expandedTaskId = null;
+  if (pomo.taskId === id) pomo.taskId = null;
   saveState(); render();
 }
-
 function checkAchievements() {
   ACHIEVEMENTS.forEach(a => {
     if (!state.unlockedAchs.includes(a.id) && a.check(state)) {
@@ -707,7 +1131,6 @@ function checkAchievements() {
     }
   });
 }
-
 function renderAchievements() {
   document.getElementById('achRow').innerHTML = ACHIEVEMENTS.map(a => {
     const unlocked = state.unlockedAchs.includes(a.id);
@@ -720,7 +1143,6 @@ function renderAchievements() {
     </div>`;
   }).join('');
 }
-
 function setTab(tab, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
@@ -728,7 +1150,6 @@ function setTab(tab, el) {
     document.getElementById('panel' + p.charAt(0).toUpperCase() + p.slice(1)).style.display = p === tab ? '' : 'none';
   });
 }
-
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
@@ -738,7 +1159,6 @@ function showToast(msg) {
 /* Categories modal */
 function openCatModal() { renderCatEditList(); document.getElementById('catModal').classList.add('show'); }
 function closeCatModal() { document.getElementById('catModal').classList.remove('show'); }
-
 function renderCatEditList() {
   const list = document.getElementById('catEditList');
   list.innerHTML = state.categories.map(cat => {
@@ -753,7 +1173,6 @@ function renderCatEditList() {
     </div>`;
   }).join('');
 }
-
 function addCategory() {
   const inp = document.getElementById('newCatName');
   const name = inp.value.trim();
@@ -765,21 +1184,18 @@ function addCategory() {
   inp.value = '';
   saveState(); renderCatEditList(); render();
 }
-
 function renameCategory(id, name) {
   const cat = state.categories.find(c => c.id === id);
   if (!cat) return;
   cat.name = name.trim() || cat.name;
   saveState(); render();
 }
-
 function setCatColor(id, color) {
   const cat = state.categories.find(c => c.id === id);
   if (!cat) return;
   cat.color = color;
   saveState(); renderCatEditList(); render();
 }
-
 function deleteCategory(id) {
   if (id === 'general') return;
   if (!confirm('Delete this category? Its tasks will move to General.')) return;
@@ -787,45 +1203,6 @@ function deleteCategory(id) {
   state.tasks.forEach(t => { if (t.category === id) t.category = 'general'; });
   if (activeFilter === id) activeFilter = 'all';
   saveState(); renderCatEditList(); render();
-}
-
-/* Pomodoro */
-function openPomodoro() { document.getElementById('timerSection').style.display = 'block'; resetPomodoro(); }
-function closePomodoro() {
-  clearInterval(pomoInterval); pomoRunning = false;
-  document.getElementById('timerSection').style.display = 'none';
-  document.getElementById('timerToggle').textContent = 'Start';
-}
-function resetPomodoro() {
-  clearInterval(pomoInterval); pomoRunning = false;
-  pomoSeconds = 25 * 60;
-  document.getElementById('timerDisplay').textContent = '25:00';
-  document.getElementById('timerLabel').textContent = 'Focus session';
-  document.getElementById('timerToggle').textContent = 'Start';
-}
-function togglePomodoro() {
-  if (pomoRunning) {
-    clearInterval(pomoInterval); pomoRunning = false;
-    document.getElementById('timerToggle').textContent = 'Resume';
-  } else {
-    pomoRunning = true;
-    document.getElementById('timerToggle').textContent = 'Pause';
-    document.getElementById('timerLabel').textContent = 'Focus session — stay locked in!';
-    pomoInterval = setInterval(() => {
-      pomoSeconds--;
-      const m = Math.floor(pomoSeconds / 60), s = pomoSeconds % 60;
-      document.getElementById('timerDisplay').textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
-      if (pomoSeconds <= 0) {
-        clearInterval(pomoInterval); pomoRunning = false;
-        document.getElementById('timerToggle').textContent = 'Start';
-        state.focusSessions = (state.focusSessions || 0) + 1;
-        state.totalXP += 15;
-        showToast('🎯 Pomodoro complete! +15 bonus XP');
-        checkAchievements();
-        saveState(); render();
-      }
-    }, 1000);
-  }
 }
 
 function resetAll() {
@@ -838,7 +1215,6 @@ function resetAll() {
   render();
 }
 
-// Pause any running timer when user closes tab
 window.addEventListener('beforeunload', () => {
   const t = getCurrentTimerTask();
   if (t) {
@@ -850,8 +1226,12 @@ window.addEventListener('beforeunload', () => {
   }
 });
 
+// ESC closes the pomodoro overlay
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && pomo.isOpen) closePomodoro();
+});
+
 render();
-startLiveTimerLoop();
 </script>
 </body>
 </html>
