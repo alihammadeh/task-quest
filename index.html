@@ -26,6 +26,7 @@
     <div class="tabs">
       <button class="tab active" onclick="setTab('active',this)">Active</button>
       <button class="tab" onclick="setTab('done',this)">Done</button>
+      <button class="tab" onclick="setTab('stats',this)">Stats</button>
       <button class="tab" onclick="setTab('achievements',this)">Achievements</button>
     </div>
 
@@ -49,6 +50,10 @@
     <div id="panelDone" style="display:none">
       <div class="cat-filters" id="catFiltersDone"></div>
       <div class="task-list" id="doneList"></div>
+    </div>
+
+    <div id="panelStats" style="display:none">
+      <div id="statsContent"></div>
     </div>
 
     <div id="panelAchievements" style="display:none">

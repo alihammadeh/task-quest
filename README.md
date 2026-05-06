@@ -1,6 +1,6 @@
 # Task Quest
 
-A gamified to-do app that helps you beat procrastination. XP rewards, levels, achievements, fullscreen Pomodoro timer with break phases, per-task time tracking, and category management.
+A gamified to-do app that helps you beat procrastination. XP rewards, levels, achievements, fullscreen Pomodoro timer with break phases, per-task time tracking, category management, and a history dashboard with charts.
 
 ## Run it
 
