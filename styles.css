@@ -314,3 +314,13 @@
   .record-value { font-size: 18px; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
   .record-label { font-size: 12px; color: var(--text-muted); }
   .record-sub { font-size: 11px; color: var(--text-subtle); margin-top: 2px; }
+
+  /* Smaller heatmap — don't let it stretch to full container width */
+  #statsHeatmap .stats-svg { max-width: 360px; margin: 0 auto; }
+  .hm-sq { width: 9px; height: 9px; }
+
+  /* Chart legend (XP bars + minutes line) */
+  .chart-legend { display: flex; gap: 16px; align-items: center; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; flex-wrap: wrap; }
+  .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 12px; height: 8px; border-radius: 2px; display: inline-block; }
+  .legend-swatch.line { width: 16px; height: 2px; border-radius: 1px; }
