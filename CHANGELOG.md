@@ -16,7 +16,7 @@ Ideas being considered for future releases:
 - Subtasks for breaking down epic quests
 - Recurring quests
 
-## [0.6.1] — 2025-05-07
+## [0.6.1] — 2026-05-07
 
 ### Changed
 - Daily XP chart upgraded to dual-axis: XP earned shown as bars (left axis), minutes tracked as a teal line overlay (right axis).
@@ -30,7 +30,7 @@ Ideas being considered for future releases:
 ### Notes
 - No data migration. Pure visual polish.
 
-## [0.6.0] — 2025-05-07
+## [0.6.0] — 2026-05-07
 
 ### Added
 - **Stats dashboard** as a new tab between Done and Achievements.
@@ -49,7 +49,7 @@ Ideas being considered for future releases:
 - History is bounded to the last 365 days to keep localStorage healthy.
 - All charts are hand-rolled SVG — zero external chart libraries.
 
-## [0.5.0] — 2025-05-06
+## [0.5.0] — 2026-05-06
 
 ### Changed
 - **Refactored single-file app into three files:** `index.html` (structure), `styles.css` (all styling), `app.js` (all logic).
@@ -59,7 +59,7 @@ Ideas being considered for future releases:
 - No behavioral change. Pure refactor to set the foundation for future features (AI categorization, calendar integration, cross-device sync).
 - GitHub Pages continues to deploy with no config changes — it's all still static files.
 
-## [0.4.0] — 2025-05-06
+## [0.4.0] — 2026-05-06
 
 ### Added
 - **Fullscreen Pomodoro experience** that takes over the entire viewport when active.
@@ -78,7 +78,7 @@ Ideas being considered for future releases:
 ### Changed
 - localStorage schema bumped to `task-quest-v4`. Settings now stored under `state.settings` (focusMins, breakMins, soundOn).
 
-## [0.3.0] — 2025-05-05
+## [0.3.0] — 2026-05-05
 
 ### Added
 - **Per-task descriptions** — click any task to expand and see/edit a description textarea (notes, links, sub-steps, context).
@@ -93,7 +93,7 @@ Ideas being considered for future releases:
 ### Changed
 - localStorage schema bumped to `task-quest-v3`.
 
-## [0.2.0] — 2025-05-05
+## [0.2.0] — 2026-05-05
 
 ### Added
 - **Task categories** with colored tag pills on every card.
@@ -106,7 +106,7 @@ Ideas being considered for future releases:
 - localStorage schema bumped to `task-quest-v2` with automatic migration from v1.
 - General category is undeletable (acts as fallback when other categories are deleted).
 
-## [0.1.0] — 2025-05-05
+## [0.1.0] — 2026-05-05
 
 ### Added
 - Initial release as a single self-contained HTML file.
