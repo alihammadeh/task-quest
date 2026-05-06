@@ -871,39 +871,80 @@ function renderStats() {
 function renderXPChart() {
   const root = document.getElementById('statsXPChart');
   const days = aggregateDaily(30);
-  const max = Math.max(1, ...days.map(d => d.xp));
+  const maxXP = Math.max(1, ...days.map(d => d.xp));
+  const maxMin = Math.max(1, ...days.map(d => Math.round(d.trackedSec / 60)));
 
-  const W = 700, H = 220, P = { l: 36, r: 10, t: 16, b: 28 };
+  const W = 700, H = 240, P = { l: 40, r: 44, t: 16, b: 28 };
   const innerW = W - P.l - P.r;
   const innerH = H - P.t - P.b;
   const barW = innerW / days.length;
 
-  const total = days.reduce((a, b) => a + b.xp, 0);
+  const totalXP = days.reduce((a, b) => a + b.xp, 0);
+  const totalMin = Math.round(days.reduce((a, b) => a + b.trackedSec, 0) / 60);
   const best = days.reduce((a, b) => b.xp > a.xp ? b : a);
-  const avg = Math.round(total / days.length);
+  const avgXP = Math.round(totalXP / days.length);
 
-  // Y axis ticks (4 nice round numbers)
-  const niceMax = niceCeil(max);
-  const ticks = [0, niceMax * 0.25, niceMax * 0.5, niceMax * 0.75, niceMax].map(v => Math.round(v));
+  // Left axis (XP) — 4 ticks
+  const niceMaxXP = niceCeil(maxXP);
+  const xpTicks = [0, niceMaxXP * 0.25, niceMaxXP * 0.5, niceMaxXP * 0.75, niceMaxXP].map(v => Math.round(v));
 
-  let yAxis = '';
-  ticks.forEach(v => {
-    const y = P.t + innerH - (v / niceMax) * innerH;
-    yAxis += `<line x1="${P.l}" x2="${W - P.r}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2 3" />`;
-    yAxis += `<text x="${P.l - 6}" y="${y + 3}" text-anchor="end" font-size="10" fill="var(--text-subtle)">${v}</text>`;
+  // Right axis (minutes) — own nice ceil
+  const niceMaxMin = niceCeil(maxMin);
+  const minTicks = [0, niceMaxMin * 0.25, niceMaxMin * 0.5, niceMaxMin * 0.75, niceMaxMin].map(v => Math.round(v));
+
+  let yAxisLeft = '';
+  xpTicks.forEach((v, i) => {
+    const y = P.t + innerH - (v / niceMaxXP) * innerH;
+    yAxisLeft += `<line x1="${P.l}" x2="${W - P.r}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2 3" />`;
+    yAxisLeft += `<text x="${P.l - 6}" y="${y + 3}" text-anchor="end" font-size="10" fill="var(--text-subtle)">${v}</text>`;
   });
 
+  // Right axis labels (minutes) — no extra grid lines, just text
+  let yAxisRight = '';
+  minTicks.forEach(v => {
+    const y = P.t + innerH - (v / niceMaxMin) * innerH;
+    yAxisRight += `<text x="${W - P.r + 6}" y="${y + 3}" text-anchor="start" font-size="10" fill="var(--text-subtle)">${v}m</text>`;
+  });
+
+  // Axis labels
+  yAxisLeft += `<text x="${P.l - 6}" y="${P.t - 4}" text-anchor="end" font-size="9" fill="var(--text-subtle)" font-weight="500">XP</text>`;
+  yAxisRight += `<text x="${W - P.r + 6}" y="${P.t - 4}" text-anchor="start" font-size="9" fill="var(--teal)" font-weight="500">MIN</text>`;
+
+  // Bars (XP)
   let bars = '';
   days.forEach((d, i) => {
     const x = P.l + i * barW + 1;
     const w = barW - 2;
-    const h = (d.xp / niceMax) * innerH;
+    const h = (d.xp / niceMaxXP) * innerH;
     const y = P.t + innerH - h;
     const isToday = i === days.length - 1;
     bars += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${isToday ? 'var(--accent-strong)' : 'var(--accent)'}" rx="2" opacity="${d.xp > 0 ? 1 : 0.15}">
-      <title>${shortDayLabel(d.ms)}: ${d.xp} XP, ${d.tasksDone} tasks</title>
+      <title>${shortDayLabel(d.ms)}: ${d.xp} XP, ${d.tasksDone} tasks, ${Math.round(d.trackedSec / 60)} min tracked</title>
     </rect>`;
   });
+
+  // Line + dots (Minutes)
+  const linePoints = days.map((d, i) => {
+    const x = P.l + i * barW + barW / 2;
+    const mins = Math.round(d.trackedSec / 60);
+    const y = P.t + innerH - (mins / niceMaxMin) * innerH;
+    return { x, y, mins, ms: d.ms };
+  });
+  let linePath = '';
+  if (linePoints.length > 0 && totalMin > 0) {
+    linePath = 'M ' + linePoints.map(p => `${p.x} ${p.y}`).join(' L ');
+  }
+  let lineSvg = '';
+  if (linePath) {
+    lineSvg += `<path d="${linePath}" stroke="var(--teal)" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round" />`;
+    linePoints.forEach(p => {
+      if (p.mins > 0) {
+        lineSvg += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="var(--teal)" stroke="var(--surface)" stroke-width="1.5">
+          <title>${shortDayLabel(p.ms)}: ${p.mins} min tracked</title>
+        </circle>`;
+      }
+    });
+  }
 
   // X axis labels (every 5 days)
   let xLabels = '';
@@ -915,13 +956,20 @@ function renderXPChart() {
 
   root.innerHTML = `
     <div class="stats-summary-row">
-      <div class="stats-summary-item"><div class="stats-summary-num">${total}</div><div class="stats-summary-lbl">Total XP</div></div>
-      <div class="stats-summary-item"><div class="stats-summary-num">${avg}</div><div class="stats-summary-lbl">Daily avg</div></div>
+      <div class="stats-summary-item"><div class="stats-summary-num">${totalXP}</div><div class="stats-summary-lbl">Total XP</div></div>
+      <div class="stats-summary-item"><div class="stats-summary-num">${avgXP}</div><div class="stats-summary-lbl">Daily avg XP</div></div>
+      <div class="stats-summary-item"><div class="stats-summary-num">${formatDuration(totalMin * 60)}</div><div class="stats-summary-lbl">Total tracked</div></div>
       <div class="stats-summary-item"><div class="stats-summary-num">${best.xp}</div><div class="stats-summary-lbl">Best day (${shortDayLabel(best.ms)})</div></div>
     </div>
+    <div class="chart-legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--accent)"></span>XP earned</span>
+      <span class="legend-item"><span class="legend-swatch line" style="background:var(--teal)"></span>Minutes tracked</span>
+    </div>
     <svg viewBox="0 0 ${W} ${H}" class="stats-svg">
-      ${yAxis}
+      ${yAxisLeft}
+      ${yAxisRight}
       ${bars}
+      ${lineSvg}
       ${xLabels}
     </svg>
   `;
@@ -958,9 +1006,9 @@ function renderHeatmap() {
     if (e.type === 'pomodoro_complete') map[k] += 15;
   }
 
-  const cell = 14, gap = 3;
-  const W = weeks * (cell + gap) + 30;
-  const H = 7 * (cell + gap) + 24;
+  const cell = 9, gap = 2;
+  const W = weeks * (cell + gap) + 24;
+  const H = 7 * (cell + gap) + 18;
   let cells = '';
   let totalActiveDays = 0;
   let maxXP = 0;
@@ -976,9 +1024,9 @@ function renderHeatmap() {
       const intensity = maxXP === 0 ? 0 : xp / maxXP;
       const lvl = xp === 0 ? 0 : intensity > 0.75 ? 4 : intensity > 0.5 ? 3 : intensity > 0.25 ? 2 : 1;
       const color = ['var(--surface-2)', '#cee0c4', '#9ec88a', '#6ba948', '#3b6d11'][lvl];
-      const x = 30 + w * (cell + gap);
-      const y = 12 + d * (cell + gap);
-      cells += `<rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="2" fill="${color}"><title>${shortDayLabel(dayMs)}: ${xp} XP</title></rect>`;
+      const x = 24 + w * (cell + gap);
+      const y = 8 + d * (cell + gap);
+      cells += `<rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="1.5" fill="${color}"><title>${shortDayLabel(dayMs)}: ${xp} XP</title></rect>`;
     }
   }
   // Day-of-week labels (Mon, Wed, Fri)
@@ -986,8 +1034,8 @@ function renderHeatmap() {
   let labels = '';
   dowLabels.forEach((l, i) => {
     if (!l) return;
-    const y = 12 + i * (cell + gap) + cell - 3;
-    labels += `<text x="0" y="${y}" font-size="10" fill="var(--text-subtle)">${l}</text>`;
+    const y = 8 + i * (cell + gap) + cell - 1;
+    labels += `<text x="0" y="${y}" font-size="8" fill="var(--text-subtle)">${l}</text>`;
   });
 
   // Streak: count consecutive days ending today with xp > 0
