@@ -1,4 +1,4 @@
-  :root {
+:root {
     --bg: #faf9f5;
     --surface: #ffffff;
     --surface-2: #f1efe8;
@@ -278,3 +278,39 @@
     .pomo-task-card { padding: 14px 16px; }
     .pomo-btn-big { padding: 12px 24px; min-width: 110px; font-size: 15px; }
   }
+
+  /* ============================
+     STATS DASHBOARD
+     ============================ */
+  .stats-section-title { font-size: 11px; font-weight: 500; color: var(--text-subtle); letter-spacing: 0.08em; text-transform: uppercase; margin: 1.5rem 0 8px; }
+  .stats-section-title:first-child { margin-top: 0; }
+  .stats-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 18px; box-shadow: var(--shadow); }
+  .stats-svg { width: 100%; height: auto; display: block; }
+  .stats-summary-row { display: flex; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; padding-bottom: 14px; border-bottom: 0.5px solid var(--border); }
+  .stats-summary-item { flex: 1; min-width: 100px; }
+  .stats-summary-num { font-size: 22px; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
+  .stats-summary-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stats-empty { background: var(--surface); border: 0.5px dashed var(--border-strong); border-radius: var(--radius-lg); padding: 3rem 1.5rem; text-align: center; }
+  .stats-empty-icon { font-size: 36px; margin-bottom: 12px; }
+  .stats-empty-title { font-size: 16px; font-weight: 500; margin-bottom: 8px; color: var(--text); }
+  .stats-empty-desc { font-size: 13px; color: var(--text-muted); max-width: 360px; margin: 0 auto; line-height: 1.55; }
+  .stats-empty-mini { text-align: center; padding: 1.5rem; color: var(--text-subtle); font-size: 13px; }
+
+  .heatmap-legend { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-subtle); margin-top: 10px; justify-content: flex-end; }
+  .hm-sq { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+
+  .donut-wrap { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+  .donut-svg { width: 200px; height: 200px; flex-shrink: 0; }
+  .donut-legend { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 180px; }
+  .donut-legend-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .donut-legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .donut-legend-name { flex: 1; color: var(--text); }
+  .donut-legend-val { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+  .stats-records { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .record-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 14px 16px; display: flex; gap: 12px; align-items: center; box-shadow: var(--shadow); }
+  .record-icon { font-size: 24px; flex-shrink: 0; }
+  .record-text { flex: 1; min-width: 0; }
+  .record-value { font-size: 18px; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
+  .record-label { font-size: 12px; color: var(--text-muted); }
+  .record-sub { font-size: 11px; color: var(--text-subtle); margin-top: 2px; }
