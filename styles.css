@@ -1,4 +1,4 @@
-:root {
+  :root {
     --bg: #faf9f5;
     --surface: #ffffff;
     --surface-2: #f1efe8;
@@ -384,3 +384,22 @@
   .auth-menu-item.danger { color: var(--danger); }
   .auth-menu-item.danger:hover { background: var(--danger-bg); }
   .auth-wrap { position: relative; }
+
+  .auth-sync-status { font-size: 11px; color: var(--text-subtle); margin-top: 4px; font-weight: 400; }
+
+  /* First-login modal */
+  .first-login-choices { display: flex; flex-direction: column; gap: 10px; }
+  .first-login-choice {
+    display: flex; gap: 14px; align-items: center;
+    padding: 14px 16px; border-radius: var(--radius-md);
+    background: var(--surface-2); border: 1px solid var(--border);
+    cursor: pointer; text-align: left; font-family: inherit; color: var(--text);
+    transition: all 0.15s;
+  }
+  .first-login-choice:hover {
+    background: var(--accent-bg); border-color: var(--accent-border);
+  }
+  .fl-choice-icon { font-size: 28px; flex-shrink: 0; }
+  .fl-choice-body { flex: 1; min-width: 0; }
+  .fl-choice-title { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .fl-choice-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }

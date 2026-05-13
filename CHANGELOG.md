@@ -6,10 +6,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
-### Added (v0.7.0 in progress — Phase 2 of cross-device sync)
+### Added (v0.7.0 in progress — Phase 2+3a+3b of cross-device sync)
 - Supabase auth integration: Google sign-in, profile display in header with avatar/name, sign-out menu
 - `config.js` file for Supabase credentials
-- Auth works as an optional feature — app remains fully functional without login (no data sync yet — that's Phase 3)
+- Auth works as an optional feature — app remains fully functional without login
+- **Phase 3a: Manual cloud sync** — "☁ Save to cloud" and "⬇ Load from cloud" buttons in the profile menu
+- "Last synced" indicator under your email in the auth menu
+- **Phase 3b: First-login conflict resolution** — automatically detects whether local and/or cloud has data on first sign-in. If only one side has data, syncs in the right direction silently. If both have data, shows a choice modal: keep local vs. use cloud. Prevents the "new device wipes my real data" scenario.
+- Note: this phase still requires manual sync after the first login. Phase 3c adds automatic background sync on every change.
 
 Ideas being considered for future releases:
 - Cross-device sync via Supabase + Google login
