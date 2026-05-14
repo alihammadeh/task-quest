@@ -540,6 +540,231 @@ async function firstLoginChoose(choice) {
   }
   markFirstLoginDone();
 }
+
+/* ============================
+   AUTO-SYNC (Phase 3c)
+   ============================
+   Mutations call markDirty(kind, id) to enqueue a sync. After a debounce
+   window, all queued changes are pushed in a single batch. The dirty queue
+   survives page reloads via localStorage so unsynced changes aren't lost. */
+
+const DIRTY_KEY = 'task-quest-dirty-queue';
+const SYNC_DEBOUNCE_MS = 1500;
+
+const autoSync = {
+  enabled: true,
+  timer: null,
+  flushing: false,
+  // Sets of dirty IDs by kind. Deletions are tracked separately so we know
+  // to issue DELETE rather than UPSERT.
+  dirty: {
+    tasks: new Set(),
+    deletedTasks: new Set(),
+    categories: new Set(),
+    deletedCategories: new Set(),
+    profile: false, // singleton — just a bool
+  },
+};
+
+function loadDirtyQueue() {
+  try {
+    const raw = localStorage.getItem(DIRTY_KEY);
+    if (!raw) return;
+    const q = JSON.parse(raw);
+    autoSync.dirty.tasks = new Set(q.tasks || []);
+    autoSync.dirty.deletedTasks = new Set(q.deletedTasks || []);
+    autoSync.dirty.categories = new Set(q.categories || []);
+    autoSync.dirty.deletedCategories = new Set(q.deletedCategories || []);
+    autoSync.dirty.profile = !!q.profile;
+  } catch (e) {}
+}
+function saveDirtyQueue() {
+  try {
+    localStorage.setItem(DIRTY_KEY, JSON.stringify({
+      tasks: [...autoSync.dirty.tasks],
+      deletedTasks: [...autoSync.dirty.deletedTasks],
+      categories: [...autoSync.dirty.categories],
+      deletedCategories: [...autoSync.dirty.deletedCategories],
+      profile: autoSync.dirty.profile,
+    }));
+  } catch (e) {}
+}
+function dirtyQueueIsEmpty() {
+  return autoSync.dirty.tasks.size === 0
+    && autoSync.dirty.deletedTasks.size === 0
+    && autoSync.dirty.categories.size === 0
+    && autoSync.dirty.deletedCategories.size === 0
+    && !autoSync.dirty.profile;
+}
+
+// Called by mutation functions to flag what changed.
+// kind: 'task' | 'task-deleted' | 'category' | 'category-deleted' | 'profile'
+function markDirty(kind, id) {
+  if (!autoSync.enabled) return;
+  if (kind === 'task')               { autoSync.dirty.tasks.add(id);              autoSync.dirty.deletedTasks.delete(id); }
+  else if (kind === 'task-deleted')  { autoSync.dirty.deletedTasks.add(id);       autoSync.dirty.tasks.delete(id); }
+  else if (kind === 'category')      { autoSync.dirty.categories.add(id);         autoSync.dirty.deletedCategories.delete(id); }
+  else if (kind === 'category-deleted') { autoSync.dirty.deletedCategories.add(id); autoSync.dirty.categories.delete(id); }
+  else if (kind === 'profile')       { autoSync.dirty.profile = true; }
+  saveDirtyQueue();
+  scheduleFlush();
+}
+
+function scheduleFlush() {
+  if (!auth.client || !auth.currentUser) return; // no point if not signed in
+  if (autoSync.timer) clearTimeout(autoSync.timer);
+  autoSync.timer = setTimeout(flushDirty, SYNC_DEBOUNCE_MS);
+  renderSyncIndicator('pending');
+}
+
+async function flushDirty() {
+  if (!auth.client || !auth.currentUser) return;
+  if (autoSync.flushing) return; // re-entry guard
+  if (dirtyQueueIsEmpty()) { renderSyncIndicator('idle'); return; }
+  autoSync.flushing = true;
+  renderSyncIndicator('syncing');
+
+  // Snapshot the queue, then clear it. New writes during sync will accumulate
+  // in a fresh queue and trigger another flush.
+  const snap = {
+    tasks: [...autoSync.dirty.tasks],
+    deletedTasks: [...autoSync.dirty.deletedTasks],
+    categories: [...autoSync.dirty.categories],
+    deletedCategories: [...autoSync.dirty.deletedCategories],
+    profile: autoSync.dirty.profile,
+  };
+  autoSync.dirty.tasks.clear();
+  autoSync.dirty.deletedTasks.clear();
+  autoSync.dirty.categories.clear();
+  autoSync.dirty.deletedCategories.clear();
+  autoSync.dirty.profile = false;
+  saveDirtyQueue();
+
+  try {
+    const userId = auth.currentUser.id;
+    const ops = [];
+
+    // Tasks upsert
+    if (snap.tasks.length > 0) {
+      const taskRows = snap.tasks
+        .map(id => state.tasks.find(t => t.id === id))
+        .filter(Boolean) // task may have been deleted between mark and flush
+        .map(t => ({
+          id: t.id,
+          user_id: userId,
+          name: t.name,
+          description: t.desc || '',
+          xp: t.xp,
+          done: t.done,
+          category: t.category,
+          tracked_sec: t.trackedSec || 0,
+          timer_started_at: t.timerStartedAt || null,
+          xp_from_time: t.xpFromTime || 0,
+          created_at: t.createdAt || null,
+          completed_at: t.completedAt || null,
+          updated_at: new Date().toISOString(),
+        }));
+      if (taskRows.length > 0) ops.push(auth.client.from('tasks').upsert(taskRows));
+    }
+    // Tasks delete
+    if (snap.deletedTasks.length > 0) {
+      ops.push(auth.client.from('tasks').delete().eq('user_id', userId).in('id', snap.deletedTasks));
+    }
+    // Categories upsert
+    if (snap.categories.length > 0) {
+      const catRows = snap.categories
+        .map(id => state.categories.find(c => c.id === id))
+        .filter(Boolean)
+        .map((c, idx) => ({
+          id: c.id,
+          user_id: userId,
+          name: c.name,
+          color: c.color,
+          sort_order: state.categories.findIndex(x => x.id === c.id),
+          updated_at: new Date().toISOString(),
+        }));
+      if (catRows.length > 0) ops.push(auth.client.from('categories').upsert(catRows));
+    }
+    // Categories delete
+    if (snap.deletedCategories.length > 0) {
+      ops.push(auth.client.from('categories').delete().eq('user_id', userId).in('id', snap.deletedCategories));
+    }
+    // Profile upsert
+    if (snap.profile) {
+      ops.push(auth.client.from('profiles').upsert({
+        user_id: userId,
+        total_xp: state.totalXP,
+        done_count: state.doneCount,
+        focus_sessions: state.focusSessions || 0,
+        unlocked_achs: state.unlockedAchs || [],
+        history: state.history || [],
+        settings: state.settings,
+        updated_at: new Date().toISOString(),
+      }));
+    }
+
+    const results = await Promise.all(ops);
+    const firstError = results.find(r => r && r.error);
+    if (firstError) throw firstError.error;
+
+    sync.lastSyncAt = Date.now();
+    sync.lastSyncDirection = 'push';
+    renderSyncIndicator('synced');
+    updateSyncStatus();
+  } catch (e) {
+    console.error('[auto-sync] flush failed:', e);
+    // Put the work back in the queue so we retry later
+    snap.tasks.forEach(id => autoSync.dirty.tasks.add(id));
+    snap.deletedTasks.forEach(id => autoSync.dirty.deletedTasks.add(id));
+    snap.categories.forEach(id => autoSync.dirty.categories.add(id));
+    snap.deletedCategories.forEach(id => autoSync.dirty.deletedCategories.add(id));
+    if (snap.profile) autoSync.dirty.profile = true;
+    saveDirtyQueue();
+    renderSyncIndicator('error');
+    showToast('⚠ Sync failed — will retry');
+    // Retry after 10 seconds
+    setTimeout(scheduleFlush, 10000);
+  } finally {
+    autoSync.flushing = false;
+  }
+}
+
+// Visual indicator next to the profile pill
+function renderSyncIndicator(status) {
+  // status: 'idle' | 'pending' | 'syncing' | 'synced' | 'error'
+  const el = document.getElementById('authSyncStatus');
+  if (!el) return;
+  if (status === 'pending') el.textContent = '✏ Will sync shortly...';
+  else if (status === 'syncing') el.textContent = '☁ Syncing...';
+  else if (status === 'synced') el.textContent = 'Synced just now';
+  else if (status === 'error') el.textContent = '⚠ Sync error — will retry';
+  else el.textContent = getSyncStatusText();
+}
+
+// Auto-pull on app load when logged in, before user starts making changes
+async function maybeAutoPullOnLoad() {
+  if (!auth.client || !auth.currentUser) return;
+  // Don't auto-pull if first-login flow is going to run (it handles its own data movement)
+  if (!localStorage.getItem(firstLoginFlagKey())) return;
+  // Don't auto-pull if we have unsynced local changes — they'd be overwritten
+  if (!dirtyQueueIsEmpty()) {
+    console.log('[auto-sync] skipping pull-on-load — unsynced local changes present');
+    scheduleFlush(); // push them instead
+    return;
+  }
+  // Quiet pull
+  await cloudPullSilent();
+}
+
+// Best-effort flush on page hide / close (uses sendBeacon-like behavior via fetch keepalive)
+window.addEventListener('beforeunload', () => {
+  if (!dirtyQueueIsEmpty()) {
+    // Try a synchronous flush attempt; usually this works for small payloads.
+    // If it doesn't complete, the queue persists in localStorage and retries next load.
+    flushDirty();
+  }
+});
+
 const COLOR_PALETTE = [
   { id: 'purple', bg: 'var(--accent-bg)',  fg: 'var(--accent-strong)', dot: '#7f77dd' },
   { id: 'info',   bg: 'var(--info-bg)',    fg: 'var(--info)',          dot: '#378add' },
@@ -682,6 +907,8 @@ function pauseTaskTimer(taskId, notify = true) {
   awardTimeXP(t);
   saveState(); render();
   if (notify) showToast(`⏸ Paused — total: ${formatDuration(t.trackedSec)}`);
+  markDirty('task', taskId);
+  markDirty('profile');
 }
 function awardTimeXP(t) {
   const earned = Math.floor((t.trackedSec || 0) / TIME_XP_INTERVAL_SEC);
@@ -719,6 +946,8 @@ let liveTimerInterval = setInterval(() => {
     const lx = getLevelXP();
     document.getElementById('xpProg').textContent = `${state.totalXP - lx.current} / ${lx.next - lx.current} XP`;
     document.getElementById('xpBar').style.width = lx.pct + '%';
+    markDirty('task', t.id);
+    markDirty('profile');
   }
 }, 1000);
 
@@ -818,6 +1047,7 @@ function updatePhaseDuration(phase) {
     renderPomodoro();
   }
   saveState();
+  markDirty('profile');
 }
 
 function selectPomodoroTask(taskId) {
@@ -892,6 +1122,7 @@ function onPhaseEnd() {
     showToast('🎯 Focus done! +15 XP. Time for a break.');
     checkAchievements();
     saveState();
+    markDirty('profile');
     // transition to break — auto start
     pomo.phase = 'break';
     pomo.remaining = getDurationFor('break');
@@ -1084,6 +1315,7 @@ function toggleSound() {
   if (state.settings.soundOn) ensureAudio();
   document.getElementById('pomoSoundBtn').textContent = state.settings.soundOn ? '🔊' : '🔇';
   document.getElementById('pomoSoundBtn').classList.toggle('muted', !state.settings.soundOn);
+  markDirty('profile');
 }
 
 /* ============================
@@ -1237,6 +1469,7 @@ function updateDesc(id, value) {
   if (!t) return;
   t.desc = value;
   saveState(); render();
+  markDirty('task', id);
 }
 function setFilter(id) { activeFilter = id; render(); }
 
@@ -1246,9 +1479,11 @@ function addTask() {
   if (!name) return;
   const xp = parseInt(document.getElementById('xpPick').value, 10);
   const category = document.getElementById('catPick').value;
-  state.tasks.unshift({ id: Date.now(), name, desc: '', xp, done: false, category, trackedSec: 0, timerStartedAt: null, xpFromTime: 0, createdAt: Date.now() });
+  const newTask = { id: Date.now(), name, desc: '', xp, done: false, category, trackedSec: 0, timerStartedAt: null, xpFromTime: 0, createdAt: Date.now() };
+  state.tasks.unshift(newTask);
   inp.value = '';
   saveState(); render();
+  markDirty('task', newTask.id);
 }
 function recordHistoryEvent(event) {
   if (!state.history) state.history = [];
@@ -1294,6 +1529,8 @@ function toggleTask(id) {
   if (t.done) showToast(`+${t.xp} XP earned!${newLvl > prevLvl ? ' 🎉 Level up! Now level ' + newLvl : ''}`);
   checkAchievements();
   saveState(); render();
+  markDirty('task', t.id);
+  markDirty('profile');
 }
 function completeTaskFromTimer(id) {
   const t = state.tasks.find(t => t.id === id);
@@ -1302,10 +1539,12 @@ function completeTaskFromTimer(id) {
   toggleTask(id);
 }
 function deleteTask(id) {
+  const existed = state.tasks.some(t => t.id === id);
   state.tasks = state.tasks.filter(t => t.id !== id);
   if (expandedTaskId === id) expandedTaskId = null;
   if (pomo.taskId === id) pomo.taskId = null;
   saveState(); render();
+  if (existed) markDirty('task-deleted', id);
 }
 function checkAchievements() {
   ACHIEVEMENTS.forEach(a => {
@@ -1766,32 +2005,46 @@ function addCategory() {
   state.categories.push({ id, name, color });
   inp.value = '';
   saveState(); renderCatEditList(); render();
+  markDirty('category', id);
 }
 function renameCategory(id, name) {
   const cat = state.categories.find(c => c.id === id);
   if (!cat) return;
   cat.name = name.trim() || cat.name;
   saveState(); render();
+  markDirty('category', id);
 }
 function setCatColor(id, color) {
   const cat = state.categories.find(c => c.id === id);
   if (!cat) return;
   cat.color = color;
   saveState(); renderCatEditList(); render();
+  markDirty('category', id);
 }
 function deleteCategory(id) {
   if (id === 'general') return;
   if (!confirm('Delete this category? Its tasks will move to General.')) return;
   state.categories = state.categories.filter(c => c.id !== id);
-  state.tasks.forEach(t => { if (t.category === id) t.category = 'general'; });
+  // Any task that was in this category needs its row updated too
+  const reassignedTaskIds = [];
+  state.tasks.forEach(t => { if (t.category === id) { t.category = 'general'; reassignedTaskIds.push(t.id); } });
   if (activeFilter === id) activeFilter = 'all';
   saveState(); renderCatEditList(); render();
+  markDirty('category-deleted', id);
+  reassignedTaskIds.forEach(tid => markDirty('task', tid));
 }
 
 function resetAll() {
   if (!confirm('This will erase all your tasks, XP, achievements, and categories. Continue?')) return;
   localStorage.removeItem(STORAGE_KEY);
   LEGACY_KEYS.forEach(k => localStorage.removeItem(k));
+  localStorage.removeItem(DIRTY_KEY);
+  // Clear in-memory dirty queue too
+  autoSync.dirty.tasks.clear();
+  autoSync.dirty.deletedTasks.clear();
+  autoSync.dirty.categories.clear();
+  autoSync.dirty.deletedCategories.clear();
+  autoSync.dirty.profile = false;
   state = defaultState();
   activeFilter = 'all';
   expandedTaskId = null;
@@ -1816,3 +2069,12 @@ window.addEventListener('keydown', e => {
 
 render();
 initAuth();
+loadDirtyQueue();
+// If we already have an active session on load, give it a beat then try to push any dirty items
+// and pull latest cloud state. We wait so initAuth can populate auth.currentUser.
+setTimeout(() => {
+  if (auth.currentUser) {
+    if (!dirtyQueueIsEmpty()) scheduleFlush();
+    else maybeAutoPullOnLoad();
+  }
+}, 1500);
