@@ -17,6 +17,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Auto-pull on app load (when signed in with no local changes pending) to surface edits from other devices.
 - Sync status indicator updates live: "Will sync shortly..." → "Syncing..." → "Synced just now" → "Sync error — will retry"
 
+### Added (streaks & daily reset)
+- **Streak tracking** — consecutive active days (any day you earn XP from completing a task or a Pomodoro), derived from the existing `history` log. A streak stays "alive but at risk" through the day after your last active day, so finishing a quest before midnight keeps it going.
+- **Header streak pill** (`🔥 N day`) shown when a streak is active; dims when today isn't active yet, with a tooltip prompting you to keep it alive.
+- Streak-aware message under the XP bar (secured / at-risk / start-a-new-streak states).
+- **Daily-reset hook** — detects a calendar-day rollover on load, on a 1-minute interval, and on tab focus; nudges you with a toast to protect an existing streak. (This is the hook recurring quests will extend to auto-revive tasks.)
+- "Longest streak" added to the Stats dashboard summary, alongside the existing current-streak and active-days counts.
+- Three new achievements: 🔥 Warming up (3-day), ⚡ On fire (7-day), 🌋 Unbreakable (30-day).
+- New local-only state field `lastActiveDay` (device-local; not synced to the cloud).
+
 Ideas being considered for future releases:
 - Cross-device sync via Supabase + Google login
 - AI auto-categorization of new tasks
