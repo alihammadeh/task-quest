@@ -26,6 +26,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Three new achievements: 🔥 Warming up (3-day), ⚡ On fire (7-day), 🌋 Unbreakable (30-day).
 - New local-only state field `lastActiveDay` (device-local; not synced to the cloud).
 
+### Added (drag to reorder)
+- **Drag to reorder tasks** within the active/done lists via native HTML5 drag-and-drop, with a grip affordance (⠿) on hover and a colored drop indicator showing where the card will land.
+- Tasks now carry a numeric `order`; lists render sorted by it. Reordering uses a fractional-midpoint scheme, so a single drag changes only the moved task's order (and marks only that one record dirty for sync).
+- New quests are inserted at the top of the list.
+- Cards are draggable only while collapsed, so dragging never interferes with selecting text in the expanded notes field.
+
+#### ⚠️ Requires a one-time Supabase migration
+The `tasks` table needs a `sort_order` column for reorder state to sync:
+```sql
+alter table public.tasks add column if not exists sort_order double precision;
+```
+Existing rows backfill lazily (a "Save to cloud" rewrites them all); the app works locally without the migration, but cloud sync of order needs it.
+
 Ideas being considered for future releases:
 - Cross-device sync via Supabase + Google login
 - AI auto-categorization of new tasks

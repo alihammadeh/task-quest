@@ -229,6 +229,7 @@ async function cloudPush() {
         xp_from_time: t.xpFromTime || 0,
         created_at: t.createdAt || null,
         completed_at: t.completedAt || null,
+        sort_order: t.order,
       }));
       const { error: taskInsErr } = await auth.client.from('tasks').insert(taskRows);
       if (taskInsErr) throw taskInsErr;
@@ -280,7 +281,8 @@ async function cloudPull() {
     const { data: taskRows, error: taskErr } = await auth.client
       .from('tasks')
       .select('*')
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .order('sort_order', { nullsFirst: false });
     if (taskErr) throw taskErr;
 
     // Rebuild local state from cloud data
@@ -306,7 +308,7 @@ async function cloudPull() {
     newState.categories = (catRows && catRows.length > 0)
       ? catRows.map(c => ({ id: c.id, name: c.name, color: c.color }))
       : DEFAULT_CATEGORIES.slice();
-    newState.tasks = (taskRows || []).map(t => ({
+    newState.tasks = (taskRows || []).map((t, idx) => ({
       id: Number(t.id),
       name: t.name,
       desc: t.description || '',
@@ -318,6 +320,7 @@ async function cloudPull() {
       xpFromTime: t.xp_from_time || 0,
       createdAt: t.created_at ? Number(t.created_at) : null,
       completedAt: t.completed_at ? Number(t.completed_at) : null,
+      order: t.sort_order != null ? Number(t.sort_order) : idx,
     }));
 
     state = newState;
@@ -436,7 +439,7 @@ async function cloudPullSilent() {
     const [profileRes, catRes, taskRes] = await Promise.all([
       auth.client.from('profiles').select('*').eq('user_id', userId).maybeSingle(),
       auth.client.from('categories').select('*').eq('user_id', userId).order('sort_order'),
-      auth.client.from('tasks').select('*').eq('user_id', userId),
+      auth.client.from('tasks').select('*').eq('user_id', userId).order('sort_order', { nullsFirst: false }),
     ]);
     if (profileRes.error) throw profileRes.error;
     if (catRes.error) throw catRes.error;
@@ -458,7 +461,7 @@ async function cloudPullSilent() {
     newState.categories = (catRes.data && catRes.data.length > 0)
       ? catRes.data.map(c => ({ id: c.id, name: c.name, color: c.color }))
       : DEFAULT_CATEGORIES.slice();
-    newState.tasks = (taskRes.data || []).map(t => ({
+    newState.tasks = (taskRes.data || []).map((t, idx) => ({
       id: Number(t.id),
       name: t.name,
       desc: t.description || '',
@@ -470,6 +473,7 @@ async function cloudPullSilent() {
       xpFromTime: t.xp_from_time || 0,
       createdAt: t.created_at ? Number(t.created_at) : null,
       completedAt: t.completed_at ? Number(t.completed_at) : null,
+      order: t.sort_order != null ? Number(t.sort_order) : idx,
     }));
 
     state = newState;
@@ -662,6 +666,7 @@ async function flushDirty() {
           xp_from_time: t.xpFromTime || 0,
           created_at: t.createdAt || null,
           completed_at: t.completedAt || null,
+          sort_order: t.order,
           updated_at: new Date().toISOString(),
         }));
       if (taskRows.length > 0) ops.push(auth.client.from('tasks').upsert(taskRows));
@@ -812,9 +817,9 @@ function defaultState() {
   const now = Date.now();
   return {
     tasks: [
-      { id: 1, name: 'Plan my top 3 priorities for today', desc: '', xp: 25, done: false, category: 'work', trackedSec: 0, timerStartedAt: null, xpFromTime: 0, createdAt: now },
-      { id: 2, name: 'Clear email inbox',                  desc: '', xp: 10, done: false, category: 'work', trackedSec: 0, timerStartedAt: null, xpFromTime: 0, createdAt: now },
-      { id: 3, name: 'Work on most important project',     desc: '', xp: 100, done: false, category: 'work', trackedSec: 0, timerStartedAt: null, xpFromTime: 0, createdAt: now },
+      { id: 1, name: 'Plan my top 3 priorities for today', desc: '', xp: 25, done: false, category: 'work', trackedSec: 0, timerStartedAt: null, xpFromTime: 0, createdAt: now, order: 0 },
+      { id: 2, name: 'Clear email inbox',                  desc: '', xp: 10, done: false, category: 'work', trackedSec: 0, timerStartedAt: null, xpFromTime: 0, createdAt: now, order: 1 },
+      { id: 3, name: 'Work on most important project',     desc: '', xp: 100, done: false, category: 'work', trackedSec: 0, timerStartedAt: null, xpFromTime: 0, createdAt: now, order: 2 },
     ],
     categories: DEFAULT_CATEGORIES.slice(),
     totalXP: 0,
@@ -831,6 +836,14 @@ function migrateTask(t) {
   return { desc: '', trackedSec: 0, timerStartedAt: null, xpFromTime: 0, category: 'general', createdAt: null, ...t };
 }
 
+// Ensure every task has a numeric `order` for drag-to-reorder. If any are
+// missing one (pre-reorder data), assign order by current array position so
+// the existing display order is preserved. Mutates and returns the array.
+function ensureTaskOrder(tasks) {
+  if (tasks.some(t => typeof t.order !== 'number')) tasks.forEach((t, i) => { t.order = i; });
+  return tasks;
+}
+
 function loadState() {
   try {
     let raw = localStorage.getItem(STORAGE_KEY);
@@ -843,7 +856,7 @@ function loadState() {
             ...defaultState(),
             ...old,
             categories: old.categories && old.categories.length ? old.categories : DEFAULT_CATEGORIES.slice(),
-            tasks: (old.tasks || []).map(migrateTask),
+            tasks: ensureTaskOrder((old.tasks || []).map(migrateTask)),
             history: old.history || [],
             settings: { focusMins: 25, breakMins: 5, soundOn: true, ...(old.settings || {}) },
           };
@@ -857,7 +870,7 @@ function loadState() {
     const merged = { ...defaultState(), ...parsed };
     merged.unlockedAchs = parsed.unlockedAchs || [];
     merged.categories = parsed.categories && parsed.categories.length ? parsed.categories : DEFAULT_CATEGORIES.slice();
-    merged.tasks = (parsed.tasks || []).map(migrateTask);
+    merged.tasks = ensureTaskOrder((parsed.tasks || []).map(migrateTask));
     merged.history = parsed.history || [];
     merged.settings = { focusMins: 25, breakMins: 5, soundOn: true, ...(parsed.settings || {}) };
     return merged;
@@ -1439,8 +1452,9 @@ function renderCatFilters(elemId, isDoneTab) {
 
 function renderTaskLists() {
   const filterFn = t => activeFilter === 'all' || t.category === activeFilter;
-  const active = state.tasks.filter(t => !t.done && filterFn(t));
-  const done   = state.tasks.filter(t =>  t.done && filterFn(t));
+  const byOrder = (a, b) => a.order - b.order;
+  const active = state.tasks.filter(t => !t.done && filterFn(t)).sort(byOrder);
+  const done   = state.tasks.filter(t =>  t.done && filterFn(t)).sort(byOrder);
   document.getElementById('activeList').innerHTML = active.length === 0
     ? '<div class="empty">No active quests in this view.</div>'
     : active.map(taskHTML).join('');
@@ -1460,8 +1474,14 @@ function taskHTML(t) {
     ? `<span class="time-pill ${isTiming ? 'live' : ''}" data-task-timer-pill="${t.id}">⏱ ${formatDuration(tracked)}</span>`
     : '';
   const descIconHTML = t.desc && t.desc.trim() ? `<span class="desc-icon">📝</span>` : '';
-  return `<div class="task-card${t.done ? ' done' : ''}${isExpanded ? ' expanded' : ''}${isTiming ? ' timing' : ''}">
+  // Cards are draggable only when collapsed, so dragging never fights with
+  // selecting text in the expanded notes textarea.
+  const dragAttrs = isExpanded ? '' : ` draggable="true"`
+    + ` ondragstart="onTaskDragStart(event, ${t.id})" ondragover="onTaskDragOver(event, ${t.id})"`
+    + ` ondragleave="onTaskDragLeave(event)" ondrop="onTaskDrop(event, ${t.id})" ondragend="onTaskDragEnd()"`;
+  return `<div class="task-card${t.done ? ' done' : ''}${isExpanded ? ' expanded' : ''}${isTiming ? ' timing' : ''}"${dragAttrs}>
     <div class="task-main" onclick="toggleExpand(event, ${t.id})">
+      <span class="drag-grip" title="Drag to reorder" onclick="event.stopPropagation()" aria-hidden="true">⠿</span>
       <button class="check-btn${t.done ? ' done' : ''}" onclick="event.stopPropagation();toggleTask(${t.id})" aria-label="${t.done ? 'Uncheck' : 'Check'}">${t.done ? '✓' : ''}</button>
       <div class="task-body">
         <div class="task-name">${escHtml(t.name)}</div>
@@ -1524,13 +1544,79 @@ function updateDesc(id, value) {
 }
 function setFilter(id) { activeFilter = id; render(); }
 
+/* ----- Drag to reorder -----
+   Each task carries a numeric `order`; the lists render sorted by it. On drop
+   we set the dragged task's order to the midpoint between its new neighbors,
+   so only that one task changes (and only it gets marked dirty for sync). */
+let dragTaskId = null;
+
+function onTaskDragStart(event, id) {
+  dragTaskId = id;
+  event.dataTransfer.effectAllowed = 'move';
+  try { event.dataTransfer.setData('text/plain', String(id)); } catch (_) {}
+  event.currentTarget.classList.add('dragging');
+}
+function dropIsBefore(event) {
+  const r = event.currentTarget.getBoundingClientRect();
+  return (event.clientY - r.top) < r.height / 2;
+}
+function onTaskDragOver(event, overId) {
+  if (dragTaskId == null || dragTaskId === overId) return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+  const card = event.currentTarget;
+  const before = dropIsBefore(event);
+  card.classList.toggle('drop-before', before);
+  card.classList.toggle('drop-after', !before);
+}
+function onTaskDragLeave(event) {
+  event.currentTarget.classList.remove('drop-before', 'drop-after');
+}
+function onTaskDrop(event, overId) {
+  event.preventDefault();
+  const before = dropIsBefore(event);
+  event.currentTarget.classList.remove('drop-before', 'drop-after');
+  if (dragTaskId != null && dragTaskId !== overId) reorderTask(dragTaskId, overId, before);
+  dragTaskId = null;
+}
+function onTaskDragEnd() {
+  dragTaskId = null;
+  document.querySelectorAll('.dragging, .drop-before, .drop-after')
+    .forEach(el => el.classList.remove('dragging', 'drop-before', 'drop-after'));
+}
+
+function reorderTask(draggedId, targetId, before) {
+  const dragged = state.tasks.find(t => t.id === draggedId);
+  const target = state.tasks.find(t => t.id === targetId);
+  if (!dragged || !target) return;
+  // Siblings = what the user currently sees in the same list (done-state +
+  // active filter), in display order, excluding the dragged card itself.
+  const siblings = state.tasks
+    .filter(t => t.done === target.done && (activeFilter === 'all' || t.category === activeFilter) && t.id !== draggedId)
+    .sort((a, b) => a.order - b.order);
+  const idx = siblings.findIndex(t => t.id === targetId);
+  let lo, hi;
+  if (before) {
+    lo = idx > 0 ? siblings[idx - 1].order : target.order - 2;
+    hi = target.order;
+  } else {
+    lo = target.order;
+    hi = idx < siblings.length - 1 ? siblings[idx + 1].order : target.order + 2;
+  }
+  dragged.order = (lo + hi) / 2;
+  saveState(); render();
+  markDirty('task', dragged.id);
+}
+
 function addTask() {
   const inp = document.getElementById('taskInput');
   const name = inp.value.trim();
   if (!name) return;
   const xp = parseInt(document.getElementById('xpPick').value, 10);
   const category = document.getElementById('catPick').value;
-  const newTask = { id: Date.now(), name, desc: '', xp, done: false, category, trackedSec: 0, timerStartedAt: null, xpFromTime: 0, createdAt: Date.now() };
+  // New quests land at the top of the list (smallest order).
+  const minOrder = state.tasks.length ? Math.min(...state.tasks.map(t => t.order)) : 0;
+  const newTask = { id: Date.now(), name, desc: '', xp, done: false, category, trackedSec: 0, timerStartedAt: null, xpFromTime: 0, createdAt: Date.now(), order: minOrder - 1 };
   state.tasks.unshift(newTask);
   inp.value = '';
   saveState(); render();
