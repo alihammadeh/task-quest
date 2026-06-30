@@ -12,7 +12,7 @@
 // installed users will keep serving stale assets.
 // =====================================================
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE = `tasks-shell-${CACHE_VERSION}`;
 
 const SHELL = [

@@ -1,17 +1,17 @@
   :root {
-    /* Coffee & cream — warm espresso accent on a soft paper background */
-    --bg: #faf6ee;
-    --surface: #fffdf8;
-    --surface-2: #f1e9da;
-    --text: #2e2620;
-    --text-muted: #6f655a;
-    --text-subtle: #9c9184;
-    --border: rgba(60, 40, 20, 0.12);
-    --border-strong: rgba(60, 40, 20, 0.22);
-    --accent: #6f4e37;
-    --accent-bg: #f0e6d8;
-    --accent-strong: #543b29;
-    --accent-border: #c9b29c;
+    /* Coffee & cream — soft latte accent on an airy paper background */
+    --bg: #fbf8f1;
+    --surface: #fffefb;
+    --surface-2: #f5efe4;
+    --text: #3a3128;
+    --text-muted: #7a6f62;
+    --text-subtle: #a89c8c;
+    --border: rgba(70, 50, 30, 0.10);
+    --border-strong: rgba(70, 50, 30, 0.18);
+    --accent: #a07c57;
+    --accent-bg: #f4ecdf;
+    --accent-strong: #7c5a3e;
+    --accent-border: #dac8b0;
     --success: #4a6312;
     --success-bg: #edf1dd;
     --info: #2c5e7a;
@@ -77,13 +77,13 @@
   .brand { display: flex; align-items: center; gap: 10px; }
   .brand-mark { width: 30px; height: 30px; display: inline-flex; color: var(--accent); }
   .brand-name { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
-  .fox { width: 100%; height: 100%; display: block; }
+  .cup { width: 100%; height: 100%; display: block; }
   .stats { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .stat-pill { display: flex; align-items: center; gap: 6px; background: var(--surface-2); border-radius: 20px; padding: 5px 12px; font-size: 13px; color: var(--text-muted); }
   .stat-pill b { color: var(--text); font-weight: 500; }
   .streak-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: inline-block; flex-shrink: 0; }
 
-  /* Mascot card — the fox companion + a contextual line, with a quiet
+  /* Mascot card — the coffee-cup companion + a contextual line, with a quiet
      unlabeled growth sliver in place of the old XP bar. */
   .mascot-card { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px 18px; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
   .mascot-avatar { width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; background: var(--accent-bg); color: var(--accent); display: flex; align-items: center; justify-content: center; padding: 7px; }
