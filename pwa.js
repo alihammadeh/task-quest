@@ -18,7 +18,8 @@
     window.addEventListener('load', registerSW);
   }
 
-  let refreshing = false;
+  let reloading = false;
+  let userInitiatedReload = false; // only reload the page when the user asks
 
   function registerSW() {
     navigator.serviceWorker.register('sw.js').then((reg) => {
@@ -40,10 +41,12 @@
       console.warn('[pwa] SW registration failed:', err);
     });
 
-    // Reload once the new worker takes control.
+    // Reload once the new worker takes control — but ONLY after the user
+    // clicked Reload. (controllerchange also fires on the very first install
+    // when the worker calls clients.claim(); we must not reload then.)
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (refreshing) return;
-      refreshing = true;
+      if (!userInitiatedReload || reloading) return;
+      reloading = true;
       window.location.reload();
     });
   }
@@ -64,6 +67,7 @@
       'font-family:inherit;">Reload</button>';
     document.body.appendChild(bar);
     document.getElementById('pwaReloadBtn').addEventListener('click', () => {
+      userInitiatedReload = true;
       worker.postMessage('SKIP_WAITING');
     });
   }

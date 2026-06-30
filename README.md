@@ -1,6 +1,6 @@
 # Task Quest
 
-A calm, warm to-do app that helps you beat procrastination. A friendly fox companion offers gentle encouragement, with quiet progress, milestones, a fullscreen focus timer with break phases, per-task time tracking, category management, and a history dashboard with charts. Dressed in a coffee-&-cream palette with light + dark modes.
+A calm, warm to-do app that helps you beat procrastination. A friendly coffee-cup companion offers gentle encouragement, with quiet progress, milestones, a fullscreen focus timer with break phases, per-task time tracking, category management, and a history dashboard with charts. Dressed in a soft coffee-&-cream palette with light + dark modes.
 
 > The motivation engine (points, levels, streaks) still runs under the hood — it's just presented quietly now, without the "video-game" styling.
 
@@ -54,7 +54,7 @@ The JS was originally one `app.js`; it was split into the modules above as it gr
 
 ## Why it works (quiet motivation)
 
-- **A friendly companion** — the fox mascot offers a short, contextual line of encouragement (streak alive, a good day, a fresh start) instead of loud notifications
+- **A friendly companion** — the coffee-cup mascot offers a short, contextual line of encouragement (streak alive, a good day, a fresh start) instead of loud notifications
 - **Effort, not points** — tasks are tagged Quick / Normal / Focused / Big rather than "+N XP"; the underlying weighting still drives the hidden progress
 - **Gentle progress** — a quiet, unlabeled sliver under the mascot hints at growth, without a number to obsess over
 - **Milestones, not badges** — a consistent seal fills in as you reach calm, plainly-named milestones

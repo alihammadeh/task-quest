@@ -7,7 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ## [Unreleased]
 
 ### Added (PWA + offline)
-- **Installable app** — added `manifest.json` (name "Tasks", standalone display, coffee `#6f4e37` theme, cream `#faf6ee` background) and a set of fox app icons in `/icons` (192 + 512 px, plus a maskable 512 variant, an Apple touch icon, and a favicon), rasterized from the inline fox SVG.
+- **Installable app** — added `manifest.json` (name "Tasks", standalone display, latte `#a07c57` theme, cream `#fbf8f1` background) and a set of coffee-cup app icons in `/icons` (192 + 512 px, plus a maskable 512 variant, an Apple touch icon, and a favicon), rasterized from the inline mascot SVG.
 - **Works offline** — a service worker (`sw.js`) precaches the full app shell with a cache-first strategy: `index.html`, `styles.css`, `config.js`, all eight JS modules, the manifest, the icons, **and the Supabase CDN bundle** (the app can't boot offline without it). The cache name is versioned (`tasks-shell-v1`) and old caches are cleaned up on activate.
 - **Cloud calls stay live** — all requests to `*.supabase.co` and every non-`GET` request bypass the cache and go straight to the network, so REST/auth traffic is never stale and the dirty queue remains the single source of truth for writes.
 - **Update flow** — `pwa.js` registers the worker and, when a new version is waiting, shows a small "A new version is ready" bar with a Reload button (no surprise reloads). It also captures `beforeinstallprompt` to offer an **Install app** button in the footer.
@@ -16,7 +16,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed (calm redesign — coffee & cream)
 - **New look and tone** — moved away from the "video-game" styling toward something calmer and more elegant. A warm **coffee-&-cream** palette (espresso accent on soft paper) replaces the purple scheme, with a matching deep-roast dark mode.
-- **A fox mascot** — a small, hand-drawn (inline SVG) fox now lives in the header and delivers a short, contextual line of encouragement in place of the old XP-bar shout. It reacts to your streak, how much you've done today, and an empty list.
+- **A coffee-cup mascot** — a small, hand-drawn (inline SVG) steaming coffee cup lives in the header and delivers a short, contextual line of encouragement in place of the old XP-bar shout. It reacts to your streak, how much you've done today, and an empty list.
+- **Softer, lighter palette** — the espresso accents were lightened toward a gentler latte tone (accent `#6f4e37` → `#a07c57`, espresso `#543b29` → `#7c5a3e`) on an airier paper background, for a calmer, less heavy feel. Text contrast is preserved.
 - **Numbers tucked away** — the header no longer shows Level / XP counters. Progress is hinted at by a quiet, unlabeled sliver under the mascot. The points/levels/streak engine still runs underneath; it's just not in your face.
 - **Calmer language** — "Task Quest ⚔" → "Tasks"; tabs are now **To do / Done / Progress / Milestones**; quests → tasks; the "+N XP" badge on each card became a plain effort tag (**Quick / Normal / Focused / Big**); toasts and the mascot speak in plain, warm sentences.
 - **Friendlier icons** — the emoji "badges" (⚔🏆💎🚀…) became a single consistent **milestone seal** that fills with a check when earned; milestone names were reworded (e.g. "First blood" → "First step"). Stats records lost their emoji for tidy accent dots, and the streak's 🔥 is gone.
