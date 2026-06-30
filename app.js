@@ -799,6 +799,9 @@ const ACHIEVEMENTS = [
   }},
   { id: 'hour1', icon: '⏰', label: 'Logged in', desc: 'Track 1 hour on tasks', check: s => totalTrackedSec(s) >= 3600 },
   { id: 'hour10', icon: '⏳', label: 'Time master', desc: 'Track 10 hours on tasks', check: s => totalTrackedSec(s) >= 36000 },
+  { id: 'streak3', icon: '🔥', label: 'Warming up', desc: '3-day streak', check: s => computeStreak(s).count >= 3 },
+  { id: 'streak7', icon: '⚡', label: 'On fire', desc: '7-day streak', check: s => computeStreak(s).count >= 7 },
+  { id: 'streak30', icon: '🌋', label: 'Unbreakable', desc: '30-day streak', check: s => computeStreak(s).count >= 30 },
 ];
 
 let state = loadState();
@@ -820,6 +823,7 @@ function defaultState() {
     unlockedAchs: [],
     history: [], // append-only log of events: { type, at, ... }
     settings: { focusMins: 25, breakMins: 5, soundOn: true },
+    lastActiveDay: null, // dayKey of the last calendar day the app handled (daily-reset detection)
   };
 }
 
@@ -1347,9 +1351,7 @@ function render() {
   const lx = getLevelXP();
   document.getElementById('xpProg').textContent = `${state.totalXP - lx.current} / ${lx.next - lx.current} XP`;
   document.getElementById('xpBar').style.width = lx.pct + '%';
-  document.getElementById('streakMsg').innerHTML = state.doneCount > 0
-    ? `<b>${state.doneCount}</b> quest${state.doneCount === 1 ? '' : 's'} slain — keep going!`
-    : 'Complete quests to earn XP and level up!';
+  renderStreak();
 
   renderCatPicker();
   renderCatFilters('catFilters', false);
@@ -1357,6 +1359,55 @@ function render() {
   renderTaskLists();
   renderAchievements();
   if (pomo.isOpen) renderPomodoro();
+}
+
+// Updates the header streak pill and the message under the XP bar.
+function renderStreak() {
+  const { count, activeToday } = computeStreak();
+
+  const pill = document.getElementById('streakPill');
+  if (pill) {
+    if (count > 0) {
+      pill.style.display = '';
+      pill.style.opacity = activeToday ? '1' : '0.55';
+      pill.title = activeToday
+        ? 'Active today — streak secured 🔥'
+        : 'Complete a quest today to keep your streak alive';
+      document.getElementById('streakCount').textContent = count;
+    } else {
+      pill.style.display = 'none';
+    }
+  }
+
+  const msg = document.getElementById('streakMsg');
+  if (!msg) return;
+  if (count > 0 && !activeToday) {
+    msg.innerHTML = `🔥 <b>${count}-day streak</b> at risk — complete a quest today to keep it alive!`;
+  } else if (count > 0) {
+    msg.innerHTML = `🔥 <b>${count}-day streak</b> — keep it going!`;
+  } else {
+    msg.innerHTML = state.doneCount > 0
+      ? `<b>${state.doneCount}</b> quest${state.doneCount === 1 ? '' : 's'} slain — start a new streak today!`
+      : 'Complete quests to earn XP and level up!';
+  }
+}
+
+// Detects a calendar-day rollover (on load and while the app stays open).
+// This is the hook recurring quests will later extend to auto-revive tasks.
+function checkDailyReset() {
+  const todayKey = dayKey(Date.now());
+  if (state.lastActiveDay === todayKey) return;
+
+  const wasFirstRun = state.lastActiveDay == null;
+  const streakBefore = computeStreak().count;
+  state.lastActiveDay = todayKey; // device-local only; not part of the synced profile
+  saveState();
+  render();
+
+  // Nudge the user to protect an existing streak when a fresh day begins.
+  if (!wasFirstRun && streakBefore > 0) {
+    showToast(`🔥 ${streakBefore}-day streak — complete a quest today to keep it!`);
+  }
 }
 
 function renderCatPicker() {
@@ -1582,6 +1633,42 @@ function dayKey(ms) {
 function shortDayLabel(ms) {
   const d = new Date(ms);
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+// Set of day-keys that had XP-earning activity (task completion or pomodoro).
+function activeDayKeySet(s = state) {
+  const set = new Set();
+  for (const e of (s.history || [])) {
+    if (e.type === 'task_complete' || e.type === 'pomodoro_complete') set.add(dayKey(e.at));
+  }
+  return set;
+}
+// Consecutive active days ending today, or ending yesterday if today isn't
+// active yet (the streak is still alive but "at risk" until you act today).
+// Returns { count, activeToday }.
+function computeStreak(s = state) {
+  const set = activeDayKeySet(s);
+  const DAY = 24 * 60 * 60 * 1000;
+  const today = startOfDay(Date.now());
+  const activeToday = set.has(dayKey(today));
+  const anchor = activeToday ? today : today - DAY;
+  if (!set.has(dayKey(anchor))) return { count: 0, activeToday: false };
+  let count = 0;
+  while (set.has(dayKey(anchor - count * DAY))) count++;
+  return { count, activeToday };
+}
+// Longest consecutive-active-day run anywhere in history.
+function longestStreak(s = state) {
+  const keys = [...activeDayKeySet(s)].sort();
+  const DAY = 24 * 60 * 60 * 1000;
+  let best = 0, run = 0, prev = null;
+  for (const k of keys) {
+    const ms = startOfDay(new Date(k + 'T00:00:00').getTime());
+    run = (prev !== null && ms - prev === DAY) ? run + 1 : 1;
+    prev = ms;
+    if (run > best) best = run;
+  }
+  return best;
 }
 
 // Build a daily aggregate from history
@@ -1814,17 +1901,13 @@ function renderHeatmap() {
     labels += `<text x="0" y="${y}" font-size="8" fill="var(--text-subtle)">${l}</text>`;
   });
 
-  // Streak: count consecutive days ending today with xp > 0
-  let streak = 0;
-  for (let i = 0; ; i++) {
-    const k = dayKey(today - i * 24 * 60 * 60 * 1000);
-    if ((map[k] || 0) > 0) streak++;
-    else break;
-  }
+  // Streak: consecutive active days (shared with the header pill).
+  const streak = computeStreak().count;
 
   root.innerHTML = `
     <div class="stats-summary-row">
       <div class="stats-summary-item"><div class="stats-summary-num">${streak}🔥</div><div class="stats-summary-lbl">Current streak</div></div>
+      <div class="stats-summary-item"><div class="stats-summary-num">${longestStreak()}</div><div class="stats-summary-lbl">Longest streak</div></div>
       <div class="stats-summary-item"><div class="stats-summary-num">${totalActiveDays}</div><div class="stats-summary-lbl">Active days</div></div>
     </div>
     <svg viewBox="0 0 ${W} ${H}" class="stats-svg">
@@ -2068,8 +2151,16 @@ window.addEventListener('keydown', e => {
 });
 
 render();
+checkDailyReset();
 initAuth();
 loadDirtyQueue();
+
+// Catch a calendar-day rollover while the app stays open (long-lived tab) or
+// when the user returns to it after it's been backgrounded past midnight.
+setInterval(checkDailyReset, 60 * 1000);
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) checkDailyReset();
+});
 // If we already have an active session on load, give it a beat then try to push any dirty items
 // and pull latest cloud state. We wait so initAuth can populate auth.currentUser.
 setTimeout(() => {
