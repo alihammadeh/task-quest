@@ -120,6 +120,11 @@ function taskHTML(t) {
     ? `<span class="time-pill ${isTiming ? 'live' : ''}" data-task-timer-pill="${t.id}">⏱ ${formatDuration(tracked)}</span>`
     : '';
   const descIconHTML = t.desc && t.desc.trim() ? `<span class="desc-icon">📝</span>` : '';
+  const subs = t.subtasks || [];
+  const subDone = subs.filter(s => s.done).length;
+  const subPillHTML = subs.length
+    ? `<span class="sub-pill${subDone === subs.length ? ' complete' : ''}">☑ ${subDone}/${subs.length}</span>`
+    : '';
   // Cards are draggable only when collapsed, so dragging never fights with
   // selecting text in the expanded notes textarea.
   const dragAttrs = isExpanded ? '' : ` draggable="true"`
@@ -134,6 +139,7 @@ function taskHTML(t) {
         <div class="task-meta">
           <span class="cat-tag" style="background:${col.bg};color:${col.fg};">${escHtml(cat.name)}</span>
           ${timePillHTML}
+          ${subPillHTML}
           ${descIconHTML}
         </div>
       </div>
@@ -150,7 +156,8 @@ function detailHTML(t) {
   const tracked = effTrackedSec(t);
   const isDone = t.done;
   return `<div class="task-detail">
-    <textarea class="desc-area" placeholder="Add notes, links, sub-tasks, context..." onchange="updateDesc(${t.id}, this.value)" onclick="event.stopPropagation()">${escHtml(t.desc || '')}</textarea>
+    ${subtasksHTML(t)}
+    <textarea class="desc-area" placeholder="Add notes, links, context..." onchange="updateDesc(${t.id}, this.value)" onclick="event.stopPropagation()">${escHtml(t.desc || '')}</textarea>
     ${!isDone ? `
     <div class="timer-mini" onclick="event.stopPropagation()">
       <div>
@@ -174,6 +181,34 @@ function detailHTML(t) {
   </div>`;
 }
 
+// Checklist for breaking an epic quest into smaller steps. Subtasks are a
+// simple { id, name, done } list on the task — no XP of their own; finishing
+// the parent quest is what pays out. Shown inside the expanded task detail.
+function subtasksHTML(t) {
+  const subs = t.subtasks || [];
+  const doneN = subs.filter(s => s.done).length;
+  const pct = subs.length ? Math.round((doneN / subs.length) * 100) : 0;
+  const rows = subs.map(s => `
+    <li class="subtask-row${s.done ? ' done' : ''}">
+      <button class="subtask-check${s.done ? ' done' : ''}" onclick="event.stopPropagation();toggleSubtask(${t.id}, ${s.id})" aria-label="${s.done ? 'Uncheck subtask' : 'Check subtask'}">${s.done ? '✓' : ''}</button>
+      <span class="subtask-name">${escHtml(s.name)}</span>
+      <button class="subtask-del" onclick="event.stopPropagation();deleteSubtask(${t.id}, ${s.id})" aria-label="Delete subtask">✕</button>
+    </li>`).join('');
+  return `<div class="subtasks" onclick="event.stopPropagation()">
+    <div class="subtasks-head">
+      <span class="subtasks-label">Subtasks</span>
+      ${subs.length ? `<span class="subtasks-progress">${doneN}/${subs.length} done</span>` : ''}
+    </div>
+    ${subs.length ? `<div class="subtask-bar"><div class="subtask-bar-fill" style="width:${pct}%"></div></div>` : ''}
+    ${rows ? `<ul class="subtask-list">${rows}</ul>` : ''}
+    <div class="subtask-add">
+      <input type="text" class="subtask-input" data-subtask-input="${t.id}" placeholder="Add a subtask..." maxlength="120"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();addSubtask(${t.id}, this.value);}" onclick="event.stopPropagation()" />
+      <button class="subtask-add-btn" onclick="event.stopPropagation();addSubtaskFromBtn(${t.id})">+ Add</button>
+    </div>
+  </div>`;
+}
+
 function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
 function toggleExpand(event, id) {
@@ -188,6 +223,43 @@ function updateDesc(id, value) {
   saveState(); render();
   markDirty('task', id);
 }
+/* ----- Subtasks (checklist inside a task) ----- */
+function addSubtaskFromBtn(taskId) {
+  const inp = document.querySelector(`[data-subtask-input="${taskId}"]`);
+  if (inp) addSubtask(taskId, inp.value);
+}
+function addSubtask(taskId, rawName) {
+  const name = (rawName || '').trim();
+  if (!name) return;
+  const t = state.tasks.find(t => t.id === taskId);
+  if (!t) return;
+  if (!Array.isArray(t.subtasks)) t.subtasks = [];
+  let sid = Date.now();
+  while (t.subtasks.some(s => s.id === sid)) sid++; // avoid collisions on rapid adds
+  t.subtasks.push({ id: sid, name, done: false });
+  saveState(); render();
+  markDirty('task', taskId);
+  // Re-render replaced the input; refocus it so the user can keep adding.
+  const inp = document.querySelector(`[data-subtask-input="${taskId}"]`);
+  if (inp) inp.focus();
+}
+function toggleSubtask(taskId, subId) {
+  const t = state.tasks.find(t => t.id === taskId);
+  if (!t || !Array.isArray(t.subtasks)) return;
+  const s = t.subtasks.find(s => s.id === subId);
+  if (!s) return;
+  s.done = !s.done;
+  saveState(); render();
+  markDirty('task', taskId);
+}
+function deleteSubtask(taskId, subId) {
+  const t = state.tasks.find(t => t.id === taskId);
+  if (!t || !Array.isArray(t.subtasks)) return;
+  t.subtasks = t.subtasks.filter(s => s.id !== subId);
+  saveState(); render();
+  markDirty('task', taskId);
+}
+
 function setFilter(id) { activeFilter = id; render(); }
 
 /* ----- Drag to reorder -----
@@ -262,7 +334,7 @@ function addTask() {
   const category = document.getElementById('catPick').value;
   // New quests land at the top of the list (smallest order).
   const minOrder = state.tasks.length ? Math.min(...state.tasks.map(t => t.order)) : 0;
-  const newTask = { id: Date.now(), name, desc: '', xp, done: false, category, trackedSec: 0, timerStartedAt: null, xpFromTime: 0, createdAt: Date.now(), order: minOrder - 1 };
+  const newTask = { id: Date.now(), name, desc: '', xp, done: false, category, trackedSec: 0, timerStartedAt: null, xpFromTime: 0, createdAt: Date.now(), order: minOrder - 1, subtasks: [] };
   state.tasks.unshift(newTask);
   inp.value = '';
   saveState(); render();

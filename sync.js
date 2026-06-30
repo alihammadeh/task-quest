@@ -95,6 +95,7 @@ async function cloudPush() {
         created_at: t.createdAt || null,
         completed_at: t.completedAt || null,
         sort_order: t.order,
+        subtasks: t.subtasks || [],
       }));
       const { error: taskInsErr } = await auth.client.from('tasks').insert(taskRows);
       if (taskInsErr) throw taskInsErr;
@@ -186,6 +187,7 @@ async function cloudPull() {
       createdAt: t.created_at ? Number(t.created_at) : null,
       completedAt: t.completed_at ? Number(t.completed_at) : null,
       order: t.sort_order != null ? Number(t.sort_order) : idx,
+      subtasks: Array.isArray(t.subtasks) ? t.subtasks : [],
     }));
 
     state = newState;
@@ -339,6 +341,7 @@ async function cloudPullSilent() {
       createdAt: t.created_at ? Number(t.created_at) : null,
       completedAt: t.completed_at ? Number(t.completed_at) : null,
       order: t.sort_order != null ? Number(t.sort_order) : idx,
+      subtasks: Array.isArray(t.subtasks) ? t.subtasks : [],
     }));
 
     state = newState;
@@ -532,6 +535,7 @@ async function flushDirty() {
           created_at: t.createdAt || null,
           completed_at: t.completedAt || null,
           sort_order: t.order,
+          subtasks: t.subtasks || [],
           updated_at: new Date().toISOString(),
         }));
       if (taskRows.length > 0) ops.push(auth.client.from('tasks').upsert(taskRows));

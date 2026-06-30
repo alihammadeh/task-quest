@@ -39,6 +39,19 @@ alter table public.tasks add column if not exists sort_order double precision;
 ```
 Existing rows backfill lazily (a "Save to cloud" rewrites them all); the app works locally without the migration, but cloud sync of order needs it.
 
+### Added (subtasks)
+- **Subtasks** — break an epic quest into a checklist of smaller steps. Each task now has a `subtasks` list; open a task to add, check off, or delete steps inline.
+- A progress bar and `N/M done` count appear in the expanded view; a `☑ N/M` pill (turning green when all are done) shows on the collapsed card.
+- Subtasks carry no XP of their own — completing the parent quest is still what pays out. They're purely for breaking work down.
+- The notes field's placeholder dropped its old "sub-tasks" hint now that subtasks are a first-class feature.
+
+#### ⚠️ Requires a one-time Supabase migration
+The `tasks` table needs a `subtasks` column for the checklist to sync across devices:
+```sql
+alter table public.tasks add column if not exists subtasks jsonb not null default '[]'::jsonb;
+```
+The app works locally without the migration; cloud sync of subtasks needs it. Existing rows backfill lazily (a "Save to cloud" rewrites them all).
+
 ### Changed (refactor)
 - **Split `app.js` (~2,260 lines) into seven focused modules** — `auth.js`, `sync.js`, `state.js`, `pomodoro.js`, `ui.js`, `stats.js`, `main.js` — loaded as plain `<script>` tags in dependency order (no build step, no ES modules; they still share global scope so inline `onclick` handlers keep working). Pure code-move refactor: the concatenation of the modules is byte-for-byte identical to the previous `app.js`, so there is no behavior change.
 
@@ -49,7 +62,6 @@ Ideas being considered for future releases:
 - Drag to reorder tasks
 - Long break every 4 Pomodoro sessions
 - PWA install + offline support
-- Subtasks for breaking down epic quests
 - Recurring quests
 
 ## [0.6.1] — 2025-05-07

@@ -61,7 +61,7 @@ function defaultState() {
 }
 
 function migrateTask(t) {
-  return { desc: '', trackedSec: 0, timerStartedAt: null, xpFromTime: 0, category: 'general', createdAt: null, ...t };
+  return { desc: '', trackedSec: 0, timerStartedAt: null, xpFromTime: 0, category: 'general', createdAt: null, subtasks: [], ...t };
 }
 
 // Ensure every task has a numeric `order` for drag-to-reorder. If any are

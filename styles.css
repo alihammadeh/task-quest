@@ -162,6 +162,30 @@
   .timer-btn.pause { background: var(--warn-bg); color: var(--warn); border-color: var(--warn); }
   .timer-btn.complete { background: var(--success-bg); color: var(--success); border-color: var(--success); }
 
+  .sub-pill { font-size: 11px; color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px; }
+  .sub-pill.complete { color: var(--success); font-weight: 500; }
+  .subtasks { margin-bottom: 12px; }
+  .subtasks-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+  .subtasks-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .subtasks-progress { font-size: 11px; color: var(--text-subtle); }
+  .subtask-bar { height: 4px; border-radius: 4px; background: var(--surface-2); overflow: hidden; margin-bottom: 8px; }
+  .subtask-bar-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.2s; }
+  .subtask-list { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+  .subtask-row { display: flex; align-items: center; gap: 8px; }
+  .subtask-check { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border-strong); background: transparent; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; padding: 0; }
+  .subtask-check:hover { border-color: var(--accent); background: var(--accent-bg); }
+  .subtask-check.done { background: var(--accent); border-color: var(--accent); color: white; }
+  .subtask-name { flex: 1; min-width: 0; font-size: 13px; color: var(--text); word-break: break-word; }
+  .subtask-row.done .subtask-name { text-decoration: line-through; color: var(--text-subtle); }
+  .subtask-del { background: none; border: none; font-size: 13px; color: var(--text-subtle); cursor: pointer; padding: 0 4px; opacity: 0.5; flex-shrink: 0; font-family: inherit; }
+  .subtask-del:hover { opacity: 1; color: var(--danger); }
+  .subtask-add { display: flex; gap: 6px; }
+  .subtask-input { flex: 1; min-width: 0; padding: 6px 10px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text); font-size: 13px; font-family: inherit; outline: none; }
+  .subtask-input:focus { border-color: var(--accent); background: var(--surface); }
+  .subtask-input::placeholder { color: var(--text-subtle); }
+  .subtask-add-btn { padding: 6px 12px; border-radius: var(--radius-sm); border: 0.5px solid var(--border-strong); background: var(--surface); color: var(--text); font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; flex-shrink: 0; }
+  .subtask-add-btn:hover { border-color: var(--accent); color: var(--accent-strong); }
+
   .empty { font-size: 13px; color: var(--text-subtle); text-align: center; padding: 2rem 0; }
   .focus-btn { width: 100%; padding: 11px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--surface); color: var(--text-muted); font-size: 13px; cursor: pointer; margin-top: 8px; font-family: inherit; }
   .focus-btn:hover { background: var(--surface-2); color: var(--text); }
