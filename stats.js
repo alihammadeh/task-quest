@@ -93,9 +93,9 @@ function renderStats() {
   if (events.length === 0) {
     root.innerHTML = `
       <div class="stats-empty">
-        <div class="stats-empty-icon">📊</div>
-        <div class="stats-empty-title">No stats yet</div>
-        <div class="stats-empty-desc">Complete a few tasks or finish a Pomodoro session and your activity will start showing up here.</div>
+        <div class="stats-empty-icon"><svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="var(--text-subtle)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20.5h18"/><rect x="5" y="11" width="3.4" height="7.5" rx="1"/><rect x="10.3" y="7" width="3.4" height="11.5" rx="1"/><rect x="15.6" y="13.5" width="3.4" height="5" rx="1"/></svg></div>
+        <div class="stats-empty-title">Nothing to show yet</div>
+        <div class="stats-empty-desc">Finish a few tasks or a focus session, and your activity will start showing up here.</div>
       </div>`;
     return;
   }
@@ -110,7 +110,7 @@ function renderStats() {
     <div class="stats-section-title">Time by category</div>
     <div class="stats-card" id="statsDonut"></div>
 
-    <div class="stats-section-title">Records</div>
+    <div class="stats-section-title">Highlights</div>
     <div class="stats-records" id="statsRecords"></div>
   `;
 
@@ -160,7 +160,7 @@ function renderXPChart() {
   });
 
   // Axis labels
-  yAxisLeft += `<text x="${P.l - 6}" y="${P.t - 4}" text-anchor="end" font-size="9" fill="var(--text-subtle)" font-weight="500">XP</text>`;
+  yAxisLeft += `<text x="${P.l - 6}" y="${P.t - 4}" text-anchor="end" font-size="9" fill="var(--text-subtle)" font-weight="500">PTS</text>`;
   yAxisRight += `<text x="${W - P.r + 6}" y="${P.t - 4}" text-anchor="start" font-size="9" fill="var(--teal)" font-weight="500">MIN</text>`;
 
   // Bars (XP)
@@ -172,7 +172,7 @@ function renderXPChart() {
     const y = P.t + innerH - h;
     const isToday = i === days.length - 1;
     bars += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${isToday ? 'var(--accent-strong)' : 'var(--accent)'}" rx="2" opacity="${d.xp > 0 ? 1 : 0.15}">
-      <title>${shortDayLabel(d.ms)}: ${d.xp} XP, ${d.tasksDone} tasks, ${Math.round(d.trackedSec / 60)} min tracked</title>
+      <title>${shortDayLabel(d.ms)}: ${d.xp} pts, ${d.tasksDone} tasks, ${Math.round(d.trackedSec / 60)} min tracked</title>
     </rect>`;
   });
 
@@ -209,13 +209,13 @@ function renderXPChart() {
 
   root.innerHTML = `
     <div class="stats-summary-row">
-      <div class="stats-summary-item"><div class="stats-summary-num">${totalXP}</div><div class="stats-summary-lbl">Total XP</div></div>
-      <div class="stats-summary-item"><div class="stats-summary-num">${avgXP}</div><div class="stats-summary-lbl">Daily avg XP</div></div>
+      <div class="stats-summary-item"><div class="stats-summary-num">${totalXP}</div><div class="stats-summary-lbl">Total points</div></div>
+      <div class="stats-summary-item"><div class="stats-summary-num">${avgXP}</div><div class="stats-summary-lbl">Daily average</div></div>
       <div class="stats-summary-item"><div class="stats-summary-num">${formatDuration(totalMin * 60)}</div><div class="stats-summary-lbl">Total tracked</div></div>
       <div class="stats-summary-item"><div class="stats-summary-num">${best.xp}</div><div class="stats-summary-lbl">Best day (${shortDayLabel(best.ms)})</div></div>
     </div>
     <div class="chart-legend">
-      <span class="legend-item"><span class="legend-swatch" style="background:var(--accent)"></span>XP earned</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--accent)"></span>Points</span>
       <span class="legend-item"><span class="legend-swatch line" style="background:var(--teal)"></span>Minutes tracked</span>
     </div>
     <svg viewBox="0 0 ${W} ${H}" class="stats-svg">
@@ -279,7 +279,7 @@ function renderHeatmap() {
       const color = ['var(--surface-2)', '#cee0c4', '#9ec88a', '#6ba948', '#3b6d11'][lvl];
       const x = 24 + w * (cell + gap);
       const y = 8 + d * (cell + gap);
-      cells += `<rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="1.5" fill="${color}"><title>${shortDayLabel(dayMs)}: ${xp} XP</title></rect>`;
+      cells += `<rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="1.5" fill="${color}"><title>${shortDayLabel(dayMs)}: ${xp} pts</title></rect>`;
     }
   }
   // Day-of-week labels (Mon, Wed, Fri)
@@ -296,7 +296,7 @@ function renderHeatmap() {
 
   root.innerHTML = `
     <div class="stats-summary-row">
-      <div class="stats-summary-item"><div class="stats-summary-num">${streak}🔥</div><div class="stats-summary-lbl">Current streak</div></div>
+      <div class="stats-summary-item"><div class="stats-summary-num">${streak}</div><div class="stats-summary-lbl">Current streak</div></div>
       <div class="stats-summary-item"><div class="stats-summary-num">${longestStreak()}</div><div class="stats-summary-lbl">Longest streak</div></div>
       <div class="stats-summary-item"><div class="stats-summary-num">${totalActiveDays}</div><div class="stats-summary-lbl">Active days</div></div>
     </div>
@@ -416,17 +416,17 @@ function renderRecords() {
   const totalFocusMins = pomoEvents.reduce((a, e) => a + (e.durationMins || 25), 0);
 
   const records = [
-    { icon: '🏆', label: 'Best day', value: `${bestDayVal} XP`, sub: bestDayLabel },
-    { icon: '📅', label: 'Best week', value: `${bestWeek} XP`, sub: 'rolling 7-day' },
-    { icon: '✅', label: 'Tasks completed', value: completionEvents.length, sub: 'all-time (last 365d)' },
-    { icon: '🍅', label: 'Pomodoros', value: pomoEvents.length, sub: `${totalFocusMins}m focus time` },
-    { icon: '⏱', label: 'Longest task time', value: formatDuration(longestTaskSec), sub: 'single task' },
-    { icon: '⭐', label: 'Total XP', value: state.totalXP, sub: `Level ${getLevel(state.totalXP)}` },
+    { label: 'Best day', value: `${bestDayVal} pts`, sub: bestDayLabel },
+    { label: 'Best week', value: `${bestWeek} pts`, sub: 'rolling 7-day' },
+    { label: 'Tasks finished', value: completionEvents.length, sub: 'all-time (last 365d)' },
+    { label: 'Focus sessions', value: pomoEvents.length, sub: `${totalFocusMins}m of focus` },
+    { label: 'Longest task time', value: formatDuration(longestTaskSec), sub: 'single task' },
+    { label: 'Total points', value: state.totalXP, sub: 'all time' },
   ];
 
   root.innerHTML = records.map(r => `
     <div class="record-card">
-      <div class="record-icon">${r.icon}</div>
+      <div class="record-icon"><span class="record-dot"></span></div>
       <div class="record-text">
         <div class="record-value">${r.value}</div>
         <div class="record-label">${r.label}</div>

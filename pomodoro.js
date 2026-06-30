@@ -120,7 +120,7 @@ function completeCurrentPomodoroTask() {
   state.totalXP += t.xp;
   state.doneCount++;
   const newLvl = getLevel(state.totalXP);
-  showToast(`+${t.xp} XP earned!${newLvl > prevLvl ? ' 🎉 Level up! Now level ' + newLvl : ''}`);
+  showToast(newLvl > prevLvl ? 'Task done — and you’ve grown a little.' : 'Task done. Nicely done.');
   checkAchievements();
   saveState();
   // show next-task picker
@@ -133,14 +133,14 @@ function showNextTaskList() {
   if (candidates.length === 0) {
     list.innerHTML = '<div style="text-align:center;font-size:13px;color:var(--text-muted);padding:1rem;">No other active tasks. Add one or close the timer.</div>';
   } else {
-    list.innerHTML = `<div style="text-align:center;font-size:11px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:0.08em;padding:6px 0;">Pick the next quest</div>` +
+    list.innerHTML = `<div style="text-align:center;font-size:11px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:0.08em;padding:6px 0;">Pick the next task</div>` +
       candidates.map(t => {
         const cat = getCategory(t.category);
         const col = getColor(cat.color);
         return `<button class="pomo-next-item" onclick="selectPomodoroTask(${t.id})">
           <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${col.dot};"></span>
           <span class="pomo-next-item-name">${escHtml(t.name)}</span>
-          <span class="xp-badge ${t.xp===10?'xp-sm':t.xp===25?'xp-md':t.xp===50?'xp-lg':'xp-xl'}">+${t.xp} XP</span>
+          ${effortTag(t.xp)}
         </button>`;
       }).join('');
   }
@@ -166,7 +166,7 @@ function onPhaseEnd() {
       durationMins: state.settings.focusMins,
       taskId: pomo.taskId || null,
     });
-    showToast('🎯 Focus done! +15 XP. Time for a break.');
+    showToast('Focus session done. Take a break.');
     checkAchievements();
     saveState();
     markDirty('profile');
@@ -176,7 +176,7 @@ function onPhaseEnd() {
     pomo.endsAt = Date.now() + pomo.remaining * 1000;
     pomo.running = true;
   } else {
-    showToast('☕ Break done! Ready for another round?');
+    showToast('Break’s over. Ready when you are.');
     pomo.phase = 'focus';
     pomo.remaining = getDurationFor('focus');
     // user must manually start the next focus session
@@ -255,7 +255,7 @@ function renderPomoTaskCard() {
   if (pomo.taskId == null) {
     card.classList.add('empty');
     if (pomo.finished) {
-      card.innerHTML = `<div>Pick your next quest below ↓</div>`;
+      card.innerHTML = `<div>Pick your next task below ↓</div>`;
     } else {
       card.innerHTML = `<div>No task selected. ${state.tasks.filter(t => !t.done).length > 0 ? 'Choose one to focus on.' : 'Add a task first.'}</div>`;
       // show selector
@@ -268,13 +268,12 @@ function renderPomoTaskCard() {
   if (!t) { card.innerHTML = ''; return; }
   const cat = getCategory(t.category);
   const col = getColor(cat.color);
-  const xpCls = t.xp === 10 ? 'xp-sm' : t.xp === 25 ? 'xp-md' : t.xp === 50 ? 'xp-lg' : 'xp-xl';
   const tracked = effTrackedSec(t);
   card.innerHTML = `
     <div class="pomo-task-header">
       <span class="cat-tag" style="background:${col.bg};color:${col.fg};">${escHtml(cat.name)}</span>
       <div class="pomo-task-name">${escHtml(t.name)}</div>
-      <span class="xp-badge ${xpCls}">+${t.xp} XP</span>
+      ${effortTag(t.xp)}
     </div>
     ${t.desc && t.desc.trim() ? `<div class="pomo-task-desc">${escHtml(t.desc)}</div>` : ''}
     <div class="pomo-task-time">⏱ Total time on this task: <span data-task-timer-display="${t.id}">${formatDuration(tracked)}</span></div>
@@ -299,7 +298,7 @@ function showNextTaskListPicker() {
       return `<button class="pomo-next-item" onclick="selectPomodoroTask(${t.id})">
         <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${col.dot};"></span>
         <span class="pomo-next-item-name">${escHtml(t.name)}</span>
-        <span class="xp-badge ${t.xp===10?'xp-sm':t.xp===25?'xp-md':t.xp===50?'xp-lg':'xp-xl'}">+${t.xp} XP</span>
+        ${effortTag(t.xp)}
       </button>`;
     }).join('');
   list.style.display = 'flex';

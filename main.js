@@ -69,7 +69,7 @@ function deleteCategory(id) {
 }
 
 function resetAll() {
-  if (!confirm('This will erase all your tasks, XP, achievements, and categories. Continue?')) return;
+  if (!confirm('This will erase all your tasks, progress, milestones, and categories. Continue?')) return;
   localStorage.removeItem(STORAGE_KEY);
   LEGACY_KEYS.forEach(k => localStorage.removeItem(k));
   localStorage.removeItem(DIRTY_KEY);

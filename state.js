@@ -1,5 +1,5 @@
 const COLOR_PALETTE = [
-  { id: 'purple', bg: 'var(--accent-bg)',  fg: 'var(--accent-strong)', dot: '#7f77dd' },
+  { id: 'purple', bg: 'var(--accent-bg)',  fg: 'var(--accent-strong)', dot: '#6f4e37' },
   { id: 'info',   bg: 'var(--info-bg)',    fg: 'var(--info)',          dot: '#378add' },
   { id: 'teal',   bg: 'var(--teal-bg)',    fg: 'var(--teal)',          dot: '#1d9e75' },
   { id: 'green',  bg: 'var(--success-bg)', fg: 'var(--success)',       dot: '#639922' },
@@ -15,26 +15,28 @@ const DEFAULT_CATEGORIES = [
   { id: 'health',   name: 'Health',   color: 'green' },
   { id: 'learning', name: 'Learning', color: 'amber' },
 ];
+// Calm, plain-language milestones. Rendered with a unified seal (see
+// milestoneSeal in ui.js), so no per-item icon is needed.
 const ACHIEVEMENTS = [
-  { id: 'first', icon: '⚔', label: 'First blood', desc: 'Complete 1 task', check: s => s.doneCount >= 1 },
-  { id: 'five', icon: '🏆', label: 'On a roll', desc: 'Complete 5 tasks', check: s => s.doneCount >= 5 },
-  { id: 'ten', icon: '💎', label: 'Unstoppable', desc: 'Complete 10 tasks', check: s => s.doneCount >= 10 },
-  { id: 'twentyfive', icon: '🚀', label: 'Productivity machine', desc: 'Complete 25 tasks', check: s => s.doneCount >= 25 },
-  { id: 'lvl3', icon: '🌟', label: 'Rising star', desc: 'Reach level 3', check: s => getLevel(s.totalXP) >= 3 },
-  { id: 'lvl5', icon: '👑', label: 'Quest master', desc: 'Reach level 5', check: s => getLevel(s.totalXP) >= 5 },
-  { id: 'lvl10', icon: '⭐', label: 'Legend', desc: 'Reach level 10', check: s => getLevel(s.totalXP) >= 10 },
-  { id: 'epic', icon: '🔥', label: 'Epic deed', desc: 'Complete an epic task', check: s => s.tasks.some(t => t.done && t.xp === 100) },
-  { id: 'focus', icon: '🎯', label: 'Focused', desc: 'Complete a Pomodoro', check: s => s.focusSessions >= 1 },
-  { id: 'focus5', icon: '🧘', label: 'Deep worker', desc: 'Complete 5 Pomodoros', check: s => s.focusSessions >= 5 },
-  { id: 'wellrounded', icon: '🎨', label: 'Well-rounded', desc: 'Complete tasks in 3 categories', check: s => {
+  { id: 'first', label: 'First step', desc: 'Finish your first task', check: s => s.doneCount >= 1 },
+  { id: 'five', label: 'Getting going', desc: 'Finish 5 tasks', check: s => s.doneCount >= 5 },
+  { id: 'ten', label: 'Ten done', desc: 'Finish 10 tasks', check: s => s.doneCount >= 10 },
+  { id: 'twentyfive', label: 'Twenty-five done', desc: 'Finish 25 tasks', check: s => s.doneCount >= 25 },
+  { id: 'lvl3', label: 'Finding rhythm', desc: 'Make steady progress', check: s => getLevel(s.totalXP) >= 3 },
+  { id: 'lvl5', label: 'In your stride', desc: 'Keep building momentum', check: s => getLevel(s.totalXP) >= 5 },
+  { id: 'lvl10', label: 'Seasoned', desc: 'Go the distance', check: s => getLevel(s.totalXP) >= 10 },
+  { id: 'epic', label: 'A big one', desc: 'Finish a big task', check: s => s.tasks.some(t => t.done && t.xp === 100) },
+  { id: 'focus', label: 'First focus', desc: 'Finish a focus timer', check: s => s.focusSessions >= 1 },
+  { id: 'focus5', label: 'Deep worker', desc: 'Finish 5 focus timers', check: s => s.focusSessions >= 5 },
+  { id: 'wellrounded', label: 'Well-rounded', desc: 'Finish tasks in 3 areas', check: s => {
     const cats = new Set(s.tasks.filter(t => t.done).map(t => t.category));
     return cats.size >= 3;
   }},
-  { id: 'hour1', icon: '⏰', label: 'Logged in', desc: 'Track 1 hour on tasks', check: s => totalTrackedSec(s) >= 3600 },
-  { id: 'hour10', icon: '⏳', label: 'Time master', desc: 'Track 10 hours on tasks', check: s => totalTrackedSec(s) >= 36000 },
-  { id: 'streak3', icon: '🔥', label: 'Warming up', desc: '3-day streak', check: s => computeStreak(s).count >= 3 },
-  { id: 'streak7', icon: '⚡', label: 'On fire', desc: '7-day streak', check: s => computeStreak(s).count >= 7 },
-  { id: 'streak30', icon: '🌋', label: 'Unbreakable', desc: '30-day streak', check: s => computeStreak(s).count >= 30 },
+  { id: 'hour1', label: 'An hour in', desc: 'Track 1 hour on tasks', check: s => totalTrackedSec(s) >= 3600 },
+  { id: 'hour10', label: 'Ten hours', desc: 'Track 10 hours on tasks', check: s => totalTrackedSec(s) >= 36000 },
+  { id: 'streak3', label: 'Three days', desc: 'A 3-day streak', check: s => computeStreak(s).count >= 3 },
+  { id: 'streak7', label: 'A full week', desc: 'A 7-day streak', check: s => computeStreak(s).count >= 7 },
+  { id: 'streak30', label: 'A whole month', desc: 'A 30-day streak', check: s => computeStreak(s).count >= 30 },
 ];
 
 let state = loadState();
@@ -162,7 +164,7 @@ function awardTimeXP(t) {
   if (delta > 0) {
     t.xpFromTime = earned;
     state.totalXP += delta;
-    showToast(`+${delta} bonus XP for time logged`);
+    showToast('Time logged — that counts.');
     checkAchievements();
   }
 }
@@ -182,15 +184,11 @@ let liveTimerInterval = setInterval(() => {
     const delta = earnedTotal - (t.xpFromTime || 0);
     t.xpFromTime = earnedTotal;
     state.totalXP += delta;
-    showToast(`+${delta} bonus XP for time logged`);
+    showToast('Time logged — that counts.');
     checkAchievements();
     saveState();
-    document.getElementById('totalXP').textContent = state.totalXP;
-    document.getElementById('level').textContent = getLevel(state.totalXP);
-    document.getElementById('lvlA').textContent = getLevel(state.totalXP);
-    const lx = getLevelXP();
-    document.getElementById('xpProg').textContent = `${state.totalXP - lx.current} / ${lx.next - lx.current} XP`;
-    document.getElementById('xpBar').style.width = lx.pct + '%';
+    const bar = document.getElementById('xpBar'); // quiet growth sliver under the mascot
+    if (bar) bar.style.width = getLevelXP().pct + '%';
     markDirty('task', t.id);
     markDirty('profile');
   }
