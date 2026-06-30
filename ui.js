@@ -60,11 +60,16 @@ function checkDailyReset() {
   const wasFirstRun = state.lastActiveDay == null;
   const streakBefore = computeStreak().count;
   state.lastActiveDay = todayKey; // device-local only; not part of the synced profile
+
+  const revived = reviveRecurringTasks(); // auto-revive due recurring quests
+
   saveState();
   render();
 
-  // Nudge the user to protect an existing streak when a fresh day begins.
-  if (!wasFirstRun && streakBefore > 0) {
+  // One nudge per rollover: announce revived quests, else protect the streak.
+  if (revived > 0) {
+    showToast(`🔁 ${revived} recurring quest${revived === 1 ? '' : 's'} renewed`);
+  } else if (!wasFirstRun && streakBefore > 0) {
     showToast(`🔥 ${streakBefore}-day streak — complete a quest today to keep it!`);
   }
 }
@@ -125,6 +130,7 @@ function taskHTML(t) {
   const subPillHTML = subs.length
     ? `<span class="sub-pill${subDone === subs.length ? ' complete' : ''}">☑ ${subDone}/${subs.length}</span>`
     : '';
+  const recurPillHTML = t.recurrence ? `<span class="recur-pill">🔁 ${recurrenceLabel(t.recurrence)}</span>` : '';
   // Cards are draggable only when collapsed, so dragging never fights with
   // selecting text in the expanded notes textarea.
   const dragAttrs = isExpanded ? '' : ` draggable="true"`
@@ -140,6 +146,7 @@ function taskHTML(t) {
           <span class="cat-tag" style="background:${col.bg};color:${col.fg};">${escHtml(cat.name)}</span>
           ${timePillHTML}
           ${subPillHTML}
+          ${recurPillHTML}
           ${descIconHTML}
         </div>
       </div>
@@ -156,6 +163,7 @@ function detailHTML(t) {
   const tracked = effTrackedSec(t);
   const isDone = t.done;
   return `<div class="task-detail">
+    ${recurrenceHTML(t)}
     ${subtasksHTML(t)}
     <textarea class="desc-area" placeholder="Add notes, links, context..." onchange="updateDesc(${t.id}, this.value)" onclick="event.stopPropagation()">${escHtml(t.desc || '')}</textarea>
     ${!isDone ? `
@@ -178,6 +186,27 @@ function detailHTML(t) {
         <div class="timer-mini-display">${formatDuration(tracked)}</div>
       </div>
     </div>`}
+  </div>`;
+}
+
+// Recurring quests: a `recurrence` of 'daily' | 'weekdays' | 'weekly' makes a
+// completed task auto-revive (become active again) when a new period begins.
+// Reviving keeps the XP/history already earned — each period's completion pays
+// out — it just resets the task's done state. See reviveRecurringTasks().
+const RECURRENCE_LABELS = { daily: 'Daily', weekdays: 'Weekdays', weekly: 'Weekly' };
+function recurrenceLabel(r) { return RECURRENCE_LABELS[r] || ''; }
+
+function recurrenceHTML(t) {
+  const r = t.recurrence || '';
+  const opt = (v, label) => `<option value="${v}"${r === v ? ' selected' : ''}>${label}</option>`;
+  return `<div class="recur-row" onclick="event.stopPropagation()">
+    <span class="recur-label">🔁 Repeat</span>
+    <select class="recur-select" onchange="setRecurrence(${t.id}, this.value)">
+      ${opt('', 'Does not repeat')}
+      ${opt('daily', 'Daily')}
+      ${opt('weekdays', 'Weekdays (Mon–Fri)')}
+      ${opt('weekly', 'Weekly')}
+    </select>
   </div>`;
 }
 
@@ -260,6 +289,45 @@ function deleteSubtask(taskId, subId) {
   markDirty('task', taskId);
 }
 
+/* ----- Recurring quests ----- */
+// True when a done recurring task's last completion is in an earlier period
+// than `now`, so it's due to come back. Missing completedAt = stale, revive.
+function recurrenceShouldRevive(t, now) {
+  if (!t.recurrence || !t.done) return false;
+  if (!t.completedAt) return true;
+  if (t.recurrence === 'weekly') return weekKey(t.completedAt) !== weekKey(now);
+  if (t.recurrence === 'weekdays') {
+    const dow = new Date(now).getDay(); // 0 Sun ... 6 Sat
+    const isWeekday = dow >= 1 && dow <= 5;
+    return isWeekday && dayKey(t.completedAt) !== dayKey(now);
+  }
+  return dayKey(t.completedAt) !== dayKey(now); // daily
+}
+// Bring due recurring tasks back to active for the new period. Does NOT touch
+// totalXP/doneCount/history — the past completion stays earned and recorded;
+// we only reset done/completedAt and uncheck subtasks. Returns the count.
+function reviveRecurringTasks(now = Date.now()) {
+  let revived = 0;
+  state.tasks.forEach(t => {
+    if (!recurrenceShouldRevive(t, now)) return;
+    t.done = false;
+    delete t.completedAt;
+    if (Array.isArray(t.subtasks)) t.subtasks.forEach(s => { s.done = false; });
+    markDirty('task', t.id);
+    revived++;
+  });
+  return revived;
+}
+function setRecurrence(taskId, value) {
+  const t = state.tasks.find(t => t.id === taskId);
+  if (!t) return;
+  t.recurrence = value || null; // '' (does not repeat) -> null
+  markDirty('task', taskId);
+  // If it's already complete from a previous period, bring it back immediately.
+  reviveRecurringTasks();
+  saveState(); render();
+}
+
 function setFilter(id) { activeFilter = id; render(); }
 
 /* ----- Drag to reorder -----
@@ -334,7 +402,7 @@ function addTask() {
   const category = document.getElementById('catPick').value;
   // New quests land at the top of the list (smallest order).
   const minOrder = state.tasks.length ? Math.min(...state.tasks.map(t => t.order)) : 0;
-  const newTask = { id: Date.now(), name, desc: '', xp, done: false, category, trackedSec: 0, timerStartedAt: null, xpFromTime: 0, createdAt: Date.now(), order: minOrder - 1, subtasks: [] };
+  const newTask = { id: Date.now(), name, desc: '', xp, done: false, category, trackedSec: 0, timerStartedAt: null, xpFromTime: 0, createdAt: Date.now(), order: minOrder - 1, subtasks: [], recurrence: null };
   state.tasks.unshift(newTask);
   inp.value = '';
   saveState(); render();

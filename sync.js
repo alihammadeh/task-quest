@@ -96,6 +96,7 @@ async function cloudPush() {
         completed_at: t.completedAt || null,
         sort_order: t.order,
         subtasks: t.subtasks || [],
+        recurrence: t.recurrence || null,
       }));
       const { error: taskInsErr } = await auth.client.from('tasks').insert(taskRows);
       if (taskInsErr) throw taskInsErr;
@@ -188,6 +189,7 @@ async function cloudPull() {
       completedAt: t.completed_at ? Number(t.completed_at) : null,
       order: t.sort_order != null ? Number(t.sort_order) : idx,
       subtasks: Array.isArray(t.subtasks) ? t.subtasks : [],
+      recurrence: t.recurrence || null,
     }));
 
     state = newState;
@@ -342,6 +344,7 @@ async function cloudPullSilent() {
       completedAt: t.completed_at ? Number(t.completed_at) : null,
       order: t.sort_order != null ? Number(t.sort_order) : idx,
       subtasks: Array.isArray(t.subtasks) ? t.subtasks : [],
+      recurrence: t.recurrence || null,
     }));
 
     state = newState;
@@ -536,6 +539,7 @@ async function flushDirty() {
           completed_at: t.completedAt || null,
           sort_order: t.order,
           subtasks: t.subtasks || [],
+          recurrence: t.recurrence || null,
           updated_at: new Date().toISOString(),
         }));
       if (taskRows.length > 0) ops.push(auth.client.from('tasks').upsert(taskRows));

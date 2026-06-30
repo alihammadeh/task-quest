@@ -11,6 +11,15 @@ function dayKey(ms) {
   const d = new Date(ms);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
+// A stable per-week key: the dayKey of that week's Monday. Handles year
+// boundaries for free and is used to detect weekly-recurrence rollovers.
+function weekKey(ms) {
+  const d = new Date(ms);
+  d.setHours(0, 0, 0, 0);
+  const offset = (d.getDay() + 6) % 7; // days since Monday (Mon=0 ... Sun=6)
+  d.setDate(d.getDate() - offset);
+  return dayKey(d.getTime());
+}
 function shortDayLabel(ms) {
   const d = new Date(ms);
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
