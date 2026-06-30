@@ -59,7 +59,6 @@ The JS was originally one `app.js`; it was split into the modules above as it gr
 - Stats view — XP/time-by-category, charts
 - Themes — let users pick color schemes
 - Long break every 4 sessions (classic Pomodoro pattern)
-- Recurring quests — daily/weekly tasks that auto-revive
 - Custom XP amounts and category colors
 - Export/import JSON
 
@@ -87,7 +86,8 @@ The JS was originally one `app.js`; it was split into the modules above as it gr
       "timerStartedAt": null,
       "xpFromTime": 0,
       "order": 0,
-      "subtasks": [{ "id": 1234567891, "name": "Step one", "done": false }]
+      "subtasks": [{ "id": 1234567891, "name": "Step one", "done": false }],
+      "recurrence": null
     }
   ],
   "categories": [{ "id": "work", "name": "Work", "color": "info" }],

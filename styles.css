@@ -164,6 +164,11 @@
 
   .sub-pill { font-size: 11px; color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px; }
   .sub-pill.complete { color: var(--success); font-weight: 500; }
+  .recur-pill { font-size: 11px; color: var(--accent-strong); display: inline-flex; align-items: center; gap: 3px; }
+  .recur-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .recur-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .recur-select { flex: 1; padding: 6px 10px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text); font-size: 13px; font-family: inherit; outline: none; cursor: pointer; }
+  .recur-select:focus { border-color: var(--accent); background: var(--surface); }
   .subtasks { margin-bottom: 12px; }
   .subtasks-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
   .subtasks-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }

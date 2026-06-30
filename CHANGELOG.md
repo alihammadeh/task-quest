@@ -39,6 +39,19 @@ alter table public.tasks add column if not exists sort_order double precision;
 ```
 Existing rows backfill lazily (a "Save to cloud" rewrites them all); the app works locally without the migration, but cloud sync of order needs it.
 
+### Added (recurring quests)
+- **Recurring quests** — set a task to repeat **Daily**, **Weekdays (Mon–Fri)**, or **Weekly** from a "🔁 Repeat" picker in the task detail. A `🔁 Daily`/`Weekdays`/`Weekly` pill shows on the card.
+- When a new period begins, a completed recurring quest **auto-revives** (becomes active again) and its subtasks are unchecked for a fresh run. This rides the existing daily-reset hook, so it triggers on load, on the 1-minute interval, and on tab focus — and a `🔁 N renewed` toast confirms it.
+- **Reviving keeps everything you earned** — the XP, completion count, and history from each period's completion stay recorded. A daily quest pays out every day you finish it, and your streak/stats reflect every completion. Weekdays-recurring tasks skip the weekend (a Friday completion comes back Monday).
+- Changing a task's recurrence to a schedule it's already overdue for revives it immediately.
+
+#### ⚠️ Requires a one-time Supabase migration
+The `tasks` table needs a `recurrence` column for repeat settings to sync:
+```sql
+alter table public.tasks add column if not exists recurrence text;
+```
+The app works locally without it; cloud sync of recurrence needs it.
+
 ### Added (subtasks)
 - **Subtasks** — break an epic quest into a checklist of smaller steps. Each task now has a `subtasks` list; open a task to add, check off, or delete steps inline.
 - A progress bar and `N/M done` count appear in the expanded view; a `☑ N/M` pill (turning green when all are done) shows on the collapsed card.
