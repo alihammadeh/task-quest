@@ -6,6 +6,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added (PWA + offline)
+- **Installable app** — added `manifest.json` (name "Tasks", standalone display, coffee `#6f4e37` theme, cream `#faf6ee` background) and a set of fox app icons in `/icons` (192 + 512 px, plus a maskable 512 variant, an Apple touch icon, and a favicon), rasterized from the inline fox SVG.
+- **Works offline** — a service worker (`sw.js`) precaches the full app shell with a cache-first strategy: `index.html`, `styles.css`, `config.js`, all eight JS modules, the manifest, the icons, **and the Supabase CDN bundle** (the app can't boot offline without it). The cache name is versioned (`tasks-shell-v1`) and old caches are cleaned up on activate.
+- **Cloud calls stay live** — all requests to `*.supabase.co` and every non-`GET` request bypass the cache and go straight to the network, so REST/auth traffic is never stale and the dirty queue remains the single source of truth for writes.
+- **Update flow** — `pwa.js` registers the worker and, when a new version is waiting, shows a small "A new version is ready" bar with a Reload button (no surprise reloads). It also captures `beforeinstallprompt` to offer an **Install app** button in the footer.
+- **Faster reconnect** — on the browser `online` event, the dirty queue flushes immediately instead of waiting for the 10-second retry timer.
+- `<head>` now links the manifest, light/dark `theme-color` metas, and Apple touch-icon / web-app meta tags.
+
 ### Changed (calm redesign — coffee & cream)
 - **New look and tone** — moved away from the "video-game" styling toward something calmer and more elegant. A warm **coffee-&-cream** palette (espresso accent on soft paper) replaces the purple scheme, with a matching deep-roast dark mode.
 - **A fox mascot** — a small, hand-drawn (inline SVG) fox now lives in the header and delivers a short, contextual line of encouragement in place of the old XP-bar shout. It reacts to your streak, how much you've done today, and an empty list.
