@@ -120,6 +120,15 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
-  <script src="app.js"></script>
+  <!-- app.js was split into these modules (plain scripts sharing global scope).
+       Load order matters: each file's top-level code may use anything defined
+       in the files above it. main.js (boot) must load last. -->
+  <script src="auth.js"></script>
+  <script src="sync.js"></script>
+  <script src="state.js"></script>
+  <script src="pomodoro.js"></script>
+  <script src="ui.js"></script>
+  <script src="stats.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>

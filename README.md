@@ -17,13 +17,22 @@ Or deploy free: drag-drop into [Netlify Drop](https://app.netlify.com/drop), pus
 
 ```
 task-quest/
-  index.html    ← HTML structure only (~115 lines)
-  styles.css    ← all styling, light + dark mode (~280 lines)
-  app.js        ← all logic: state, rendering, timer, achievements (~840 lines)
+  index.html    ← HTML structure only
+  styles.css    ← all styling, light + dark mode
+  config.js     ← Supabase credentials (anon key; safe to commit with RLS on)
   README.md     ← this file
+
+  JS modules (plain <script> tags sharing global scope; load order matters):
+  auth.js       ← constants + Supabase auth
+  sync.js       ← manual sync, first-login conflict flow, auto-sync dirty queue
+  state.js      ← state, load/save + migrations, level/time helpers, live timer
+  pomodoro.js   ← Pomodoro state, sound (Web Audio), tick loop
+  ui.js         ← render(), task list, drag-to-reorder, task mutations, achievements
+  stats.js      ← stats dashboard (charts, heatmap, streaks)
+  main.js       ← tabs, category modal, toasts, event listeners, app boot
 ```
 
-The split was done after v4 to make future features (AI categorization, calendar sync, etc.) easier to add. Each file has a single responsibility.
+The JS was originally one `app.js`; it was split into the modules above as it grew. They are **plain scripts, not ES modules** — they share global scope (so the inline `onclick` handlers in the HTML keep working) and are loaded in dependency order, with `main.js` (the boot block) last. No build step.
 
 ## Architecture notes
 

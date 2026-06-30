@@ -39,6 +39,9 @@ alter table public.tasks add column if not exists sort_order double precision;
 ```
 Existing rows backfill lazily (a "Save to cloud" rewrites them all); the app works locally without the migration, but cloud sync of order needs it.
 
+### Changed (refactor)
+- **Split `app.js` (~2,260 lines) into seven focused modules** — `auth.js`, `sync.js`, `state.js`, `pomodoro.js`, `ui.js`, `stats.js`, `main.js` — loaded as plain `<script>` tags in dependency order (no build step, no ES modules; they still share global scope so inline `onclick` handlers keep working). Pure code-move refactor: the concatenation of the modules is byte-for-byte identical to the previous `app.js`, so there is no behavior change.
+
 Ideas being considered for future releases:
 - Cross-device sync via Supabase + Google login
 - AI auto-categorization of new tasks
