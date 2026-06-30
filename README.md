@@ -1,6 +1,8 @@
 # Task Quest
 
-A gamified to-do app that helps you beat procrastination. XP rewards, levels, achievements, fullscreen Pomodoro timer with break phases, per-task time tracking, category management, and a history dashboard with charts.
+A calm, warm to-do app that helps you beat procrastination. A friendly fox companion offers gentle encouragement, with quiet progress, milestones, a fullscreen focus timer with break phases, per-task time tracking, category management, and a history dashboard with charts. Dressed in a coffee-&-cream palette with light + dark modes.
+
+> The motivation engine (points, levels, streaks) still runs under the hood — it's just presented quietly now, without the "video-game" styling.
 
 ## Run it
 
@@ -44,12 +46,13 @@ The JS was originally one `app.js`; it was split into the modules above as it gr
 
 **Per-task timer:** When running, only `timerStartedAt` is stored. Effective time = `trackedSec + (now - timerStartedAt)`. This means even if the tab is closed, the math still works on reload.
 
-## Why it works (gamification)
+## Why it works (quiet motivation)
 
-- **Variable rewards** — XP amounts vary (10/25/50/100), more dopamine-engaging than uniform rewards
-- **Sunk-cost progress bar** — the level XP bar makes you reluctant to stop near a level-up
-- **Big quests for hard tasks** — assigning your most-avoided task as `+100 XP` reframes dread as anticipation
-- **Pomodoro built in** — 25-min focus session with bonus XP, plus per-task time logging earns +1 XP per 5 minutes
+- **A friendly companion** — the fox mascot offers a short, contextual line of encouragement (streak alive, a good day, a fresh start) instead of loud notifications
+- **Effort, not points** — tasks are tagged Quick / Normal / Focused / Big rather than "+N XP"; the underlying weighting still drives the hidden progress
+- **Gentle progress** — a quiet, unlabeled sliver under the mascot hints at growth, without a number to obsess over
+- **Milestones, not badges** — a consistent seal fills in as you reach calm, plainly-named milestones
+- **Focus timer built in** — a fullscreen focus session with break phases, plus per-task time logging
 
 ## Ideas for improvements
 

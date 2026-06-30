@@ -1,63 +1,65 @@
   :root {
-    --bg: #faf9f5;
-    --surface: #ffffff;
-    --surface-2: #f1efe8;
-    --text: #1a1a1a;
-    --text-muted: #6b6a64;
-    --text-subtle: #9b9a92;
-    --border: rgba(0, 0, 0, 0.1);
-    --border-strong: rgba(0, 0, 0, 0.2);
-    --accent: #7f77dd;
-    --accent-bg: #eeedfe;
-    --accent-strong: #534ab7;
-    --accent-border: #afa9ec;
-    --success: #3b6d11;
-    --success-bg: #eaf3de;
-    --info: #185fa5;
-    --info-bg: #e6f1fb;
-    --warn: #854f0b;
-    --warn-bg: #faeeda;
-    --danger: #993c1d;
-    --danger-bg: #faece7;
-    --pink-bg: #fbeaf0;
-    --pink: #993556;
-    --teal-bg: #e1f5ee;
-    --teal: #0f6e56;
-    --gray-bg: #f1efe8;
-    --gray: #5f5e5a;
+    /* Coffee & cream — warm espresso accent on a soft paper background */
+    --bg: #faf6ee;
+    --surface: #fffdf8;
+    --surface-2: #f1e9da;
+    --text: #2e2620;
+    --text-muted: #6f655a;
+    --text-subtle: #9c9184;
+    --border: rgba(60, 40, 20, 0.12);
+    --border-strong: rgba(60, 40, 20, 0.22);
+    --accent: #6f4e37;
+    --accent-bg: #f0e6d8;
+    --accent-strong: #543b29;
+    --accent-border: #c9b29c;
+    --success: #4a6312;
+    --success-bg: #edf1dd;
+    --info: #2c5e7a;
+    --info-bg: #e4eef1;
+    --warn: #92591a;
+    --warn-bg: #f7ecd8;
+    --danger: #9a4424;
+    --danger-bg: #f6e7df;
+    --pink-bg: #f6e6e3;
+    --pink: #9a4a52;
+    --teal-bg: #e2f0ea;
+    --teal: #2c6b58;
+    --gray-bg: #f1e9da;
+    --gray: #6b6055;
     --radius-sm: 6px;
     --radius-md: 8px;
     --radius-lg: 12px;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow: 0 1px 2px rgba(60, 40, 20, 0.05);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #1c1c1a;
-      --surface: #262624;
-      --surface-2: #2c2c2a;
-      --text: #f1efe8;
-      --text-muted: #b4b2a9;
-      --text-subtle: #888780;
-      --border: rgba(255, 255, 255, 0.1);
-      --border-strong: rgba(255, 255, 255, 0.2);
-      --accent: #afa9ec;
-      --accent-bg: #2e2a4a;
-      --accent-strong: #cecbf6;
-      --accent-border: #534ab7;
-      --success: #97c459;
-      --success-bg: #1f2e0e;
-      --info: #85b7eb;
-      --info-bg: #0f2238;
-      --warn: #fac775;
-      --warn-bg: #3a2807;
-      --danger: #f0997b;
-      --danger-bg: #3a1f10;
-      --pink-bg: #3a1828;
-      --pink: #ed93b1;
-      --teal-bg: #0c3327;
-      --teal: #5dcaa5;
-      --gray-bg: #2c2c2a;
-      --gray: #b4b2a9;
+      /* Deep roast — warm latte accent on dark coffee surfaces */
+      --bg: #1f1a15;
+      --surface: #2a241d;
+      --surface-2: #342d24;
+      --text: #f3ece0;
+      --text-muted: #c2b6a5;
+      --text-subtle: #8f8475;
+      --border: rgba(255, 245, 230, 0.1);
+      --border-strong: rgba(255, 245, 230, 0.2);
+      --accent: #cba37a;
+      --accent-bg: #3a2e22;
+      --accent-strong: #e6cda9;
+      --accent-border: #6f4e37;
+      --success: #a7cc66;
+      --success-bg: #25300f;
+      --info: #8fc0d8;
+      --info-bg: #15282f;
+      --warn: #f0c479;
+      --warn-bg: #3a2a0d;
+      --danger: #f0a07b;
+      --danger-bg: #3a2113;
+      --pink-bg: #3a2122;
+      --pink: #eaa0a4;
+      --teal-bg: #133029;
+      --teal: #6fc7ab;
+      --gray-bg: #342d24;
+      --gray: #c2b6a5;
     }
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -72,17 +74,24 @@
   .container { max-width: 720px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
 
   .header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 1.25rem; }
-  .title { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
-  .stats { display: flex; gap: 8px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark { width: 30px; height: 30px; display: inline-flex; color: var(--accent); }
+  .brand-name { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
+  .fox { width: 100%; height: 100%; display: block; }
+  .stats { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .stat-pill { display: flex; align-items: center; gap: 6px; background: var(--surface-2); border-radius: 20px; padding: 5px 12px; font-size: 13px; color: var(--text-muted); }
   .stat-pill b { color: var(--text); font-weight: 500; }
+  .streak-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: inline-block; flex-shrink: 0; }
 
-  .xp-bar-wrap { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px 18px; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
-  .xp-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
-  .xp-track { height: 10px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
-  .xp-fill { height: 100%; border-radius: 5px; background: var(--accent); transition: width 0.5s ease; }
-  .streak { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 8px; }
-  .streak b { color: var(--danger); }
+  /* Mascot card — the fox companion + a contextual line, with a quiet
+     unlabeled growth sliver in place of the old XP bar. */
+  .mascot-card { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px 18px; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
+  .mascot-avatar { width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; background: var(--accent-bg); color: var(--accent); display: flex; align-items: center; justify-content: center; padding: 7px; }
+  .mascot-speech { flex: 1; min-width: 0; }
+  .mascot-line { font-size: 14px; color: var(--text); line-height: 1.5; }
+  .mascot-line b { font-weight: 500; }
+  .mascot-progress { height: 4px; background: var(--surface-2); border-radius: 4px; overflow: hidden; margin-top: 9px; }
+  .mascot-progress-fill { height: 100%; border-radius: 4px; background: var(--accent-border); transition: width 0.5s ease; }
 
   .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
   .tab { padding: 6px 14px; border-radius: 20px; font-size: 13px; border: 0.5px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; font-family: inherit; }
@@ -133,11 +142,12 @@
   .time-pill { font-size: 11px; color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px; }
   .time-pill.live { color: var(--accent-strong); font-weight: 500; }
   .desc-icon { font-size: 11px; color: var(--text-subtle); }
-  .xp-badge { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 10px; flex-shrink: 0; }
-  .xp-sm { background: var(--success-bg); color: var(--success); }
-  .xp-md { background: var(--info-bg); color: var(--info); }
-  .xp-lg { background: var(--warn-bg); color: var(--warn); }
-  .xp-xl { background: var(--danger-bg); color: var(--danger); }
+  /* Effort tag — a calm replacement for the old "+N XP" badge. */
+  .effort-tag { font-size: 10px; font-weight: 500; padding: 2px 9px; border-radius: 10px; flex-shrink: 0; letter-spacing: 0.02em; }
+  .eff-quick  { background: var(--success-bg); color: var(--success); }
+  .eff-normal { background: var(--surface-2); color: var(--text-muted); }
+  .eff-deep   { background: var(--warn-bg); color: var(--warn); }
+  .eff-big    { background: var(--danger-bg); color: var(--danger); }
   .expand-arrow { font-size: 11px; color: var(--text-subtle); transition: transform 0.2s; flex-shrink: 0; }
   .task-card.expanded .expand-arrow { transform: rotate(90deg); }
   .del-btn { background: none; border: none; font-size: 16px; color: var(--text-subtle); cursor: pointer; padding: 2px 6px; opacity: 0.5; flex-shrink: 0; font-family: inherit; }
@@ -197,13 +207,14 @@
 
   .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
   .ach { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 12px; box-shadow: var(--shadow); }
-  .ach.unlocked { background: var(--warn-bg); border-color: var(--warn); }
-  .ach .ach-icon { font-size: 20px; flex-shrink: 0; }
+  .ach.unlocked { background: var(--accent-bg); border-color: var(--accent-border); }
+  .ach .ach-icon { width: 24px; height: 24px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .ach .seal { width: 24px; height: 24px; display: block; }
   .ach .ach-text { font-size: 12px; }
   .ach .ach-label { font-weight: 500; color: var(--text); }
-  .ach.unlocked .ach-label { color: var(--warn); }
+  .ach.unlocked .ach-label { color: var(--accent-strong); }
   .ach .ach-desc { color: var(--text-muted); font-size: 11px; }
-  .ach.locked { opacity: 0.55; }
+  .ach.locked { opacity: 0.6; }
 
   /* Modals (categories) */
   .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
@@ -346,7 +357,8 @@
 
   .stats-records { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
   .record-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 14px 16px; display: flex; gap: 12px; align-items: center; box-shadow: var(--shadow); }
-  .record-icon { font-size: 24px; flex-shrink: 0; }
+  .record-icon { width: 24px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .record-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
   .record-text { flex: 1; min-width: 0; }
   .record-value { font-size: 18px; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
   .record-label { font-size: 12px; color: var(--text-muted); }

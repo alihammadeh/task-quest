@@ -2,15 +2,12 @@
    MAIN APP RENDER
    ============================ */
 function render() {
-  const lvl = getLevel(state.totalXP);
-  document.getElementById('level').textContent = lvl;
-  document.getElementById('totalXP').textContent = state.totalXP;
-  document.getElementById('doneCount').textContent = state.doneCount;
-  document.getElementById('lvlA').textContent = lvl;
+  // The level/points numbers are kept internally but no longer shown — the
+  // header is calm and the growth bar under the mascot is the only hint.
   const lx = getLevelXP();
-  document.getElementById('xpProg').textContent = `${state.totalXP - lx.current} / ${lx.next - lx.current} XP`;
-  document.getElementById('xpBar').style.width = lx.pct + '%';
-  renderStreak();
+  const bar = document.getElementById('xpBar');
+  if (bar) bar.style.width = lx.pct + '%';
+  renderMascot();
 
   renderCatPicker();
   renderCatFilters('catFilters', false);
@@ -20,8 +17,8 @@ function render() {
   if (pomo.isOpen) renderPomodoro();
 }
 
-// Updates the header streak pill and the message under the XP bar.
-function renderStreak() {
+// Updates the header streak pill and the fox mascot's line.
+function renderMascot() {
   const { count, activeToday } = computeStreak();
 
   const pill = document.getElementById('streakPill');
@@ -30,25 +27,41 @@ function renderStreak() {
       pill.style.display = '';
       pill.style.opacity = activeToday ? '1' : '0.55';
       pill.title = activeToday
-        ? 'Active today — streak secured 🔥'
-        : 'Complete a quest today to keep your streak alive';
-      document.getElementById('streakCount').textContent = count;
+        ? 'Active today — your streak is going'
+        : 'Finish a task today to keep your streak';
+      const c = document.getElementById('streakCount');
+      if (c) c.textContent = count;
     } else {
       pill.style.display = 'none';
     }
   }
 
-  const msg = document.getElementById('streakMsg');
-  if (!msg) return;
-  if (count > 0 && !activeToday) {
-    msg.innerHTML = `🔥 <b>${count}-day streak</b> at risk — complete a quest today to keep it alive!`;
-  } else if (count > 0) {
-    msg.innerHTML = `🔥 <b>${count}-day streak</b> — keep it going!`;
-  } else {
-    msg.innerHTML = state.doneCount > 0
-      ? `<b>${state.doneCount}</b> quest${state.doneCount === 1 ? '' : 's'} slain — start a new streak today!`
-      : 'Complete quests to earn XP and level up!';
-  }
+  const line = document.getElementById('mascotLine');
+  if (line) line.innerHTML = mascotMessage(count, activeToday);
+}
+
+// The fox's contextual encouragement. Calm, plain, and number-light.
+function mascotMessage(count, activeToday) {
+  const today = dayKey(Date.now());
+  const doneToday = (state.history || []).filter(e => e.type === 'task_complete' && dayKey(e.at) === today).length;
+  const active = state.tasks.filter(t => !t.done).length;
+
+  if (count > 0 && !activeToday) return `Your <b>${count}-day streak</b> is still alive — finish one task to keep it.`;
+  if (doneToday >= 5) return `<b>${doneToday}</b> done today. A really good day.`;
+  if (doneToday > 0) return `<b>${doneToday}</b> done today${count > 1 ? ` · ${count}-day streak` : ''}. Nice and steady.`;
+  if (active === 0) return `All clear. Add something when you’re ready.`;
+
+  const pool = [
+    'A fresh page. Pick one thing to begin.',
+    'Small steps count. What’s first today?',
+    'One task at a time — you’ve got this.',
+    'Quiet focus beats a busy rush.',
+    'Choose one task and give it ten minutes.',
+  ];
+  // Stable pick per day so the line doesn't flicker on every re-render.
+  let h = 0;
+  for (const ch of today) h = (h * 31 + ch.charCodeAt(0)) % pool.length;
+  return pool[h];
 }
 
 // Detects a calendar-day rollover (on load and while the app stays open).
@@ -68,9 +81,9 @@ function checkDailyReset() {
 
   // One nudge per rollover: announce revived quests, else protect the streak.
   if (revived > 0) {
-    showToast(`🔁 ${revived} recurring quest${revived === 1 ? '' : 's'} renewed`);
+    showToast(`🔁 ${revived} recurring task${revived === 1 ? '' : 's'} back for today`);
   } else if (!wasFirstRun && streakBefore > 0) {
-    showToast(`🔥 ${streakBefore}-day streak — complete a quest today to keep it!`);
+    showToast(`Your ${streakBefore}-day streak is alive — finish a task today to keep it.`);
   }
 }
 
@@ -107,15 +120,23 @@ function renderTaskLists() {
   const active = state.tasks.filter(t => !t.done && filterFn(t)).sort(byOrder);
   const done   = state.tasks.filter(t =>  t.done && filterFn(t)).sort(byOrder);
   document.getElementById('activeList').innerHTML = active.length === 0
-    ? '<div class="empty">No active quests in this view.</div>'
+    ? '<div class="empty">Nothing to do here yet.</div>'
     : active.map(taskHTML).join('');
   document.getElementById('doneList').innerHTML = done.length === 0
-    ? '<div class="empty">No completed quests in this view.</div>'
+    ? '<div class="empty">Nothing finished here yet.</div>'
     : done.map(taskHTML).join('');
 }
 
+// Map the (internal) XP weight to a calm effort label shown on the card.
+function effortTag(xp) {
+  const m = xp === 10 ? ['eff-quick', 'Quick']
+          : xp === 50 ? ['eff-deep', 'Focused']
+          : xp === 100 ? ['eff-big', 'Big']
+          : ['eff-normal', 'Normal'];
+  return `<span class="effort-tag ${m[0]}">${m[1]}</span>`;
+}
+
 function taskHTML(t) {
-  const cls = t.xp === 10 ? 'xp-sm' : t.xp === 25 ? 'xp-md' : t.xp === 50 ? 'xp-lg' : 'xp-xl';
   const cat = getCategory(t.category);
   const col = getColor(cat.color);
   const isExpanded = expandedTaskId === t.id;
@@ -150,7 +171,7 @@ function taskHTML(t) {
           ${descIconHTML}
         </div>
       </div>
-      <span class="xp-badge ${cls}">+${t.xp} XP</span>
+      ${effortTag(t.xp)}
       <span class="expand-arrow">▶</span>
       <button class="del-btn" onclick="event.stopPropagation();deleteTask(${t.id})" aria-label="Delete">✕</button>
     </div>
@@ -449,7 +470,10 @@ function toggleTask(id) {
     delete t.completedAt;
   }
   const newLvl = getLevel(state.totalXP);
-  if (t.done) showToast(`+${t.xp} XP earned!${newLvl > prevLvl ? ' 🎉 Level up! Now level ' + newLvl : ''}`);
+  if (t.done) {
+    const lines = ['Done.', 'Nice — one off the list.', 'Good work.', 'That’s done.'];
+    showToast(newLvl > prevLvl ? 'Done — and you’ve grown a little.' : lines[Math.floor(Math.random() * lines.length)]);
+  }
   checkAchievements();
   saveState(); render();
   markDirty('task', t.id);
@@ -473,15 +497,24 @@ function checkAchievements() {
   ACHIEVEMENTS.forEach(a => {
     if (!state.unlockedAchs.includes(a.id) && a.check(state)) {
       state.unlockedAchs.push(a.id);
-      showToast(`${a.icon} Achievement: ${a.label}`);
+      showToast(`✓ Milestone: ${a.label}`);
     }
   });
+}
+// A unified milestone "seal": a filled, checked stamp when earned; a faint
+// outline when not. Replaces the old per-achievement emoji for a calm,
+// consistent look — the label and description carry the meaning.
+function milestoneSeal(unlocked) {
+  return `<svg class="seal" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="9.5" fill="${unlocked ? 'var(--accent)' : 'none'}" stroke="${unlocked ? 'var(--accent)' : 'var(--border-strong)'}" stroke-width="1.5"/>
+    ${unlocked ? '<path d="M7.5 12.5 l3 3 L16.5 9" fill="none" stroke="var(--surface)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' : ''}
+  </svg>`;
 }
 function renderAchievements() {
   document.getElementById('achRow').innerHTML = ACHIEVEMENTS.map(a => {
     const unlocked = state.unlockedAchs.includes(a.id);
     return `<div class="ach ${unlocked ? 'unlocked' : 'locked'}">
-      <span class="ach-icon">${a.icon}</span>
+      <span class="ach-icon">${milestoneSeal(unlocked)}</span>
       <div class="ach-text">
         <div class="ach-label">${a.label}</div>
         <div class="ach-desc">${a.desc}</div>

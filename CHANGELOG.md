@@ -6,6 +6,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Changed (calm redesign — coffee & cream)
+- **New look and tone** — moved away from the "video-game" styling toward something calmer and more elegant. A warm **coffee-&-cream** palette (espresso accent on soft paper) replaces the purple scheme, with a matching deep-roast dark mode.
+- **A fox mascot** — a small, hand-drawn (inline SVG) fox now lives in the header and delivers a short, contextual line of encouragement in place of the old XP-bar shout. It reacts to your streak, how much you've done today, and an empty list.
+- **Numbers tucked away** — the header no longer shows Level / XP counters. Progress is hinted at by a quiet, unlabeled sliver under the mascot. The points/levels/streak engine still runs underneath; it's just not in your face.
+- **Calmer language** — "Task Quest ⚔" → "Tasks"; tabs are now **To do / Done / Progress / Milestones**; quests → tasks; the "+N XP" badge on each card became a plain effort tag (**Quick / Normal / Focused / Big**); toasts and the mascot speak in plain, warm sentences.
+- **Friendlier icons** — the emoji "badges" (⚔🏆💎🚀…) became a single consistent **milestone seal** that fills with a check when earned; milestone names were reworded (e.g. "First blood" → "First step"). Stats records lost their emoji for tidy accent dots, and the streak's 🔥 is gone.
+- No data or behavior changes — same storage schema, same sync. This is purely presentation.
+
+
 ### Added (v0.7.0 in progress — Phase 2+3a+3b+3c of cross-device sync)
 - Supabase auth integration: Google sign-in, profile display in header with avatar/name, sign-out menu
 - `config.js` file for Supabase credentials
