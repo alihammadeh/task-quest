@@ -22,6 +22,9 @@ task-quest/
   index.html    ← HTML structure only
   styles.css    ← all styling, light + dark mode
   config.js     ← Supabase credentials (anon key; safe to commit with RLS on)
+  manifest.json ← PWA manifest (installable app metadata)
+  sw.js         ← service worker (offline app-shell cache)
+  icons/        ← fox app icons (192/512, maskable, apple-touch, favicon)
   README.md     ← this file
 
   JS modules (plain <script> tags sharing global scope; load order matters):
@@ -32,6 +35,7 @@ task-quest/
   ui.js         ← render(), task list, drag-to-reorder, task mutations, achievements
   stats.js      ← stats dashboard (charts, heatmap, streaks)
   main.js       ← tabs, category modal, toasts, event listeners, app boot
+  pwa.js        ← service-worker registration, update flow, install button (loads last)
 ```
 
 The JS was originally one `app.js`; it was split into the modules above as it grew. They are **plain scripts, not ES modules** — they share global scope (so the inline `onclick` handlers in the HTML keep working) and are loaded in dependency order, with `main.js` (the boot block) last. No build step.
@@ -45,6 +49,8 @@ The JS was originally one `app.js`; it was split into the modules above as it gr
 **Pomodoro:** Uses absolute timestamps (`endsAt`) rather than counting intervals — survives tab focus loss, OS sleep, etc. accurately. Audio is generated via Web Audio API (no audio files).
 
 **Per-task timer:** When running, only `timerStartedAt` is stored. Effective time = `trackedSec + (now - timerStartedAt)`. This means even if the tab is closed, the math still works on reload.
+
+**PWA / offline:** `sw.js` precaches the app shell (HTML, CSS, all JS modules, icons, manifest, and the Supabase CDN bundle) cache-first, so the app loads and runs with no network. Anything on `*.supabase.co` and all non-`GET` requests skip the cache and hit the network, so cloud data is never stale and offline writes still queue through `sync.js`'s dirty queue (which flushes on reconnect). The service worker needs a secure context — it activates over `https://` or `http://localhost`, not `file://`. **Bump `CACHE_VERSION` in `sw.js` whenever you change any shell file**, or installed users keep serving stale assets. Worth a Lighthouse PWA audit after shell changes.
 
 ## Why it works (quiet motivation)
 
@@ -71,7 +77,7 @@ The JS was originally one `app.js`; it was split into the modules above as it gr
 - Cross-device sync (Supabase, Firebase, or custom)
 - Auth (Clerk, Supabase Auth)
 - Notion/Slack/Linear integrations
-- PWA install + offline support (manifest + service worker)
+- ~~PWA install + offline support (manifest + service worker)~~ ✅ done
 
 ## Data shape (localStorage)
 
